@@ -1,0 +1,564 @@
+//1. write a script count the number of vowels in the entered string in unix.
+
+//2.Write a shell script to display content of all the regular files of current directory.
+
+//3.Write a shell script to count the total number of words and lines ofthe given file.[Do not use wc command.]
+
+//4.  (a)Write a shell script to check whether two files are same or not.
+If the files are same the second file should be deleted from the directory.(File names should be passed as command line arguments
+and perform proper validations.)	
+     (b) Write command for following:
+
+     1. List file names consisting of only digits =>       ls | grep -E '^[0-9]+$'
+
+     2.	Display lines from file that having the string “computer” at least thrice. => grep -E '(computer.*){3,}' filename
+     
+      3.Remove all alphabets from the file. => sed 's/[a-zA-Z]//g' filename
+
+
+     4.	Display all the lines that are 10 characters long and ends with $.    => grep -E '^.{9}\$$' filename
+
+     5.	Display all the lines that have five words in it.  =>grep -E '^(\S+\s+){4}\S+$' filename
+
+//5.(a)	Write a shell script to check whether two files are same or not.
+
+If the files are same the second file should be deleted from the directory.(File names should be passed as command line arguments
+and perform proper validations.)	
+(b)	Write command for the following.	
+1.	Display all lines of the file that contains only special character in it.
+2.	Replace all the occurrence of the word “Good morning” with “Good evening”.
+3.	Display name of all the file/sub directories of current directory along with its permission and file type.
+4.	Display all the blank lines with line numbers of the given file.
+5.	Display all the lines that have even number of fields.
+
+
+//6.(a)   Write a shell script to accept a string from the user and convert all the         
+odd number characters into upper case, e.g.	Input: tybca
+Output: TyBcA
+
+    (b)   Write an awk script to display all the words of a line in reverse order of      
+the given file.
+
+
+7)..    Write an awk script to count the no. of words in the file.
+
+#!/usr/bin/awk -f
+
+# Initialize the word count variable
+BEGIN {
+  word_count = 0;
+}
+
+{
+  # Increment word count by the number of fields in the current line
+  word_count += NF;
+}
+
+END {
+  # Print the total number of words
+  print "Total number of words:", word_count;
+}
+
+
+Alternatively, you can run the AWK command directly from the command line:
+awk '{ total += NF } END { print "Total number of words:", total }' filename.txt
+
+
+
+8) WRITE A shell script which accepts a user name and check the entered user is currently logged or not.
+
+#!/bin/bash
+
+# Prompt the user for a username
+read -p "Enter the username to check: " username
+
+# Check if the username is non-empty
+if [ -z "$username" ]; then
+  echo "Please enter a valid username."
+  exit 1
+fi
+
+# Check if the user is currently logged in
+if who | grep -q "^$username "; then
+  echo "User '$username' is currently logged in."
+else
+  echo "User '$username' is not logged in."
+fi
+
+
+GIV IT EXECUTABL E PERMISSION=
+
+chmod +x check_user.sh
+
+
+SAVE :- check_user.sh
+
+
+//9.write a shell script to check the file is directory or a file. the file name is entered at the command prompt as an argument
+// 10. write a script to reverse string string should be passed as an argument
+// 11. DISPLAY LINE that have 5 letter string that start with T and ends with e.
+//12. display lines that have numbers only
+//13.display lines that  start with character a.
+
+
+
+
+
+1) .write a script count the number of vowels in the entered string in unix.
+
+#!/bin/bash
+
+# Read input from the user
+echo "Enter a string:"
+read input
+
+# Convert input to lowercase to count both uppercase and lowercase vowels
+input=$(echo "$input" | tr '[:upper:]' '[:lower:]')
+
+# Initialize the vowel count to 0
+vowel_count=0
+
+# Loop through each character in the input string
+for (( i=0; i<${#input}; i++ )); do
+  char=${input:$i:1}
+  if [[ "$char" == "a" || "$char" == "e" || "$char" == "i" || "$char" == "o" || "$char" == "u" ]]; then
+    vowel_count=$((vowel_count+1))
+  fi
+done
+
+# Output the result
+echo "Number of vowels: $vowel_count"
+
+
+=> Save :-   sh count_vowels.sh
+
+ sed -i 's/\r$//' count_vowels.sh
+
+
+
+2. 
+ (a) Write a shell script to display content of all the regular files of current directory.		[30]
+
+
+#!/bin/bash
+
+# Loop through all items in the current directory
+for file in *; do
+  # Check if the item is a regular file
+  if [ -f "$file" ]; then
+    echo "Displaying content of $file:"
+    cat "$file"
+    echo "---------------------------"
+  fi
+done
+ 
+
+
+This script loops through all the items in the current directory, checks if each one is a regular file (using the -f flag), and displays its contents using the cat command.
+
+
+(b) Write command for following:	[10]
+
+1.	List file names consisting of only digits
+ =>        ls | grep -E '^[0-9]+$'
+
+2.	Display lines from file that having the string “computer” at least thrice.
+=> grep -E '(computer.*){3,}' filename
+
+
+3.	Remove all alphabets from the file.
+=> sed 's/[a-zA-Z]//g' filename
+
+
+4.	Display all the lines that are 10 characters long and ends with $.
+=> grep -E '^.{9}\$$' filename
+
+
+5.	Display all the lines that have five words in it.
+=>grep -E '^(\S+\s+){4}\S+$' filename
+
+
+
+3).  (a)	Write a shell script to count the total number of words and lines ofthe given file.[Do not use wc command.]	[30]
+
+=> 
+
+
+
+#!/bin/bash
+
+# Check if a filename is provided
+if [ -z "$1" ]; then
+  echo "Please provide a filename."
+  exit 1
+fi
+
+# Check if the file exists and is a regular file
+if [ ! -f "$1" ]; then
+  echo "File not found or is not a regular file."
+  exit 1
+fi
+
+# Initialize counters for lines and words
+line_count=0
+word_count=0
+
+# Read the file line by line
+while IFS= read -r line; do
+  # Increment line count
+  line_count=$((line_count + 1))
+
+  # Count words in the current line and add to total word count
+  words_in_line=$(echo "$line" | wc -w)
+  word_count=$((word_count + words_in_line))
+done < "$1"
+
+# Output the total number of lines and words
+echo "Total number of lines: $line_count"
+echo "Total number of words: $word_count"
+
+
+
+=> save:- count_words_lines.sh
+
+
+(b)	Write command for following:	[10]
+
+1.	To print the line number as well as name of the employee whose salary is more than 20,000.
+=> awk '$2 > 20000 {print NR, $1}' filename
+
+
+2.	Display all the lines that starts with A and ends with $.
+=>
+ grep -E '^A.*\$$' filename
+
+3.	Display 1st word of 10th to 20th line of the file.
+=>sed -n '10,20p' filename | awk '{print $1}'
+
+
+4.	Remove extra spaces all the lines of the file.
+=>     sed 's/[[:space:]]\+/ /g' filename
+
+ or 
+awk '{$1=$1; print}' filename
+
+
+5.	Display all the lines that occur more than once in the given file.
+
+=>sort filename | uniq -d
+
+
+
+
+//5	(a)	Write a shell script to check whether two files are same or not.
+If the files are same the second file should be deleted from the directory.(File names should be passed as command line arguments
+and perform proper validations.)	
+
+
+code:-
+
+#!/bin/bash
+
+# Check if exactly two arguments are provided
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <file1> <file2>"
+  exit 1
+fi
+
+file1=$1
+file2=$2
+
+# Check if both files exist
+if [ ! -f "$file1" ]; then
+  echo "Error: File '$file1' does not exist."
+  exit 1
+fi
+
+if [ ! -f "$file2" ]; then
+  echo "Error: File '$file2' does not exist."
+  exit 1
+fi
+
+# Compare the two files
+if cmp -s "$file1" "$file2"; then
+  echo "The files are the same. Deleting '$file2'."
+  rm "$file2"
+else
+  echo "The files are different."
+fi
+
+=> NOTE: How to run:
+Save the script to a file (e.g., check_files.sh).
+=>Give it executable permission
+
+chmod +x check_files.sh
+
+
+=>Run the script with two file names as arguments:
+ ./check_files.sh file1.txt file2.txt
+
+
+
+
+
+(b)	Write command for the following.	[10]
+
+1.	Display all lines of the file that contains only special character in it.
+=> grep '^[^a-zA-Z0-9]*$' filename
+
+
+2.	Replace all the occurrence of the word “Good morning” with “Good evening”.
+=>sed -i 's/Good morning/Good evening/g' filename
+
+
+3.	Display name of all the file/sub directories of current directory along with its permission and file type.
+=>  ls -l
+
+
+4.	Display all the blank lines with line numbers of the given file.
+=>    grep -n '^$' filename
+
+5.	Display all the lines that have even number of fields.
+=>awk 'NF % 2 == 0' filename
+
+
+6). (a)   Write a shell script to accept a string from the user and convert all the         [30]
+odd number characters into upper case, e.g.	Input: tybca
+Output: TyBcA
+
+CODE;-
+
+
+#!/bin/bash
+
+# Prompt the user for input
+read -p "Enter a string: " input
+
+# Initialize an empty result string
+result=""
+
+# Loop through each character of the input string
+for (( i=0; i<${#input}; i++ )); do
+  char=${input:$i:1}
+  
+  # Check if the index is odd (0-based indexing, so i + 1 is odd)
+  if (( (i + 1) % 2 != 0 )); then
+    result+=$(echo "$char" | tr '[:lower:]' '[:upper:]')  # Convert to uppercase
+  else
+    result+="$char"  # Keep the character as is
+  fi
+done
+
+# Output the result
+echo "Output: $result"
+
+
+note:- How to run:
+Save the script to a file (e.g., convert_case.sh)
+
+chmod +x convert_case.sh
+ 
+run:- ./convert_case.sh
+
+
+(b)   Write an awk script to display all the words of a line in reverse order of   the given file.
+
+#!/usr/bin/awk -f
+
+{
+  # Loop through each field (word) in the line
+  for (i = NF; i > 0; i--) {
+    printf "%s ", $i;  # Print each word in reverse order
+  }
+  print "";  # Print a new line after each reversed line
+}
+
+
+
+=> Alternatively, you can run it directly from the command line without saving it to a file:
+code for run :-
+
+ awk '{for (i = NF; i > 0; i--) printf "%s ", $i; print ""}' filename.txt
+
+
+
+9).write a shell script to check the file is directory or a file. the file name is entered at the command prompt as an argument
+
+
+
+#!/bin/bash
+
+# Check if exactly one argument is provided
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <filename_or_directory>"
+  exit 1
+fi
+
+# Store the argument in a variable
+path=$1
+
+# Check if the path is a directory
+if [ -d "$path" ]; then
+  echo "'$path' is a directory."
+# Check if the path is a regular file
+elif [ -f "$path" ]; then
+  echo "'$path' is a file."
+# If it's neither
+else
+  echo "'$path' is not a file or directory."
+fi
+
+
+save :- check_file_or_directory.sh
+
+
+=> Give it executable permission:
+chmod +x check_file_or_directory.sh
+
+=> Run the script with a filename or directory name as an argument
+./check_file_or_directory.sh your_file_or_directory_name
+
+=> Example Usage:
+To check if example.txt is a file or directory:
+./check_file_or_directory.sh example.txt
+
+=> ./check_file_or_directory.sh example.txt
+
+
+./check_file_or_directory.sh my_directory
+
+10). write a script to reverse string string should be passed as an argument
+
+=> #!/bin/bash
+
+# Check if exactly one argument is provided
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <string>"
+  exit 1
+fi
+
+# Store the input string
+input="$1"
+
+# Initialize an empty string for the reversed output
+reversed=""
+
+# Loop through the input string in reverse order
+for (( i=${#input}-1; i>=0; i-- )); do
+  reversed+="${input:$i:1}"
+done
+
+# Output the reversed string
+echo "Reversed string: $reversed"
+
+=> How to run the script:
+Save the script to a file (e.g., reverse_string.sh).
+Give it executable permission:
+
+chmod +x reverse_string.sh
+
+./reverse_string.sh "Hello, World!"
+
+Run the script with a string as an argument
+
+./reverse_string.sh "Hello, World!"
+
+=> Example Output:
+If you run: ./reverse_string.sh "Hello, World!"
+output will be:  Reversed string: !dlroW ,olleH
+
+
+
+11). DISPLAY LINE that have 5 letter string that start with T and ends with e.\
+=> grep -E '\bT[a-zA-Z]{3}e\b' filename.txt
+
+=>Example Usage:
+Suppose you have a file named words.txt with the following content:Table
+Tree
+Theme
+Tiger
+Tense
+Total
+Twelve
+
+=> Running the command: grep -E '\bT[a-zA-Z]{3}e\b' words.txt
+=> shell script:- 
+#!/bin/bash
+
+# Check if a filename is provided
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <filename>"
+  exit 1
+fi
+
+# Use grep to find lines with the specified pattern
+grep -E '\bT[a-zA-Z]{3}e\b' "$1"
+
+save  shell script :- find_words.sh
+
+12). display lines that have numbers only
+
+=> grep '^[0-9]\+$' filename.txt
+
+
+example:-  file named data.txt 
+run :- grep '^[0-9]\+$' data.txt
+
+
+shell script:-
+#!/bin/bash
+
+# Check if a filename is provided
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <filename>"
+  exit 1
+fi
+
+# Use grep to find lines that contain only numbers
+grep '^[0-9]\+$' "$1"
+
+
+13). display lines that  start with character a.
+=> grep '^a' filename.txt
+
+
+=> example :- 
+Example Usage
+Suppose you have a file named data.txt with the following content:apple
+banana
+avocado
+grape
+apricot
+berry
+
+Running the command:grep '^a' data.txt
+
+
+
+=> Case-Insensitive Search    :- grep -i '^a' filename.txt
+If you want to perform a case-insensitive search (to match lines that start with either "a" or "A"), you can add the -i option:
+
+
+shell script:- 
+#!/bin/bash
+
+# Check if a filename is provided
+if [ "$#" -ne 1 ]; then
+  echo "Usage: $0 <filename>"
+  exit 1
+fi
+
+# Use grep to find lines that start with 'a'
+grep '^a' "$1"
+
+
+=> How to Run the Script
+Save the script to a file (e.g., find_lines_starting_with_a.sh).
+Give it executable permission: chmod +x find_lines_starting_with_a.sh
+Run the script with a filename as an argument :- ./find_lines_starting_with_a.sh data.txt
+
+
+
+
+
+ 

@@ -1,0 +1,259 @@
+//1. Develop “Online Complaint System” by providing following	
+	functionality.	[40]
+	Technician:	
+
+-	Login
+
+-	View and Update status (Pending / solved) of the
+
+complaint
+
+Registered user:
+
+-	Give complaints according to services (Hardware /
+
+Software/ Internet)       in asp.net
+
+
+=> Step 1: Database Design
+We will create three tables:
+
+User: To store login information for technicians and registered users.
+Complaint: To store complaints submitted by registered users.
+Service: To store the types of services (Hardware, Software, Internet).
+Database Models (Code-First)
+1.1 Entity Framework Models
+
+=>User Table Model
+public class User
+{
+    public int Id { get; set; }
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public string Role { get; set; }  // 'Technician' or 'User'
+}
+
+
+=>Service Table Model
+
+public class Service
+{
+    public int Id { get; set; }
+    public string ServiceName { get; set; }  // Hardware, Software, Internet
+}
+
+=>Complaint Table Model
+public class Complaint
+{
+    public int Id { get; set; }
+    public string Description { get; set; }
+    public string Status { get; set; }  // Pending / Solved
+    public int UserId { get; set; }  // Foreign key to User (Registered User)
+    public virtual User User { get; set; }
+    public int ServiceId { get; set; }  // Foreign key to Service
+    public virtual Service Service { get; set; }
+}
+
+
+=> 1.2 Entity Framework Database Context
+public class ComplaintContext : DbContext
+{
+    public DbSet<User> Users { get; set; }
+    public DbSet<Service> Services { get; set; }
+    public DbSet<Complaint> Complaints { get; set; }
+}
+
+=>Step 2: Web Forms Design and Code
+2.1 Technician Login (TechnicianLogin.aspx)
+
+TechnicianLogin.aspx (UI)
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="TechnicianLogin.aspx.cs" Inherits="OnlineComplaintSystem.TechnicianLogin" %>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Technician Login</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div>
+            <h2>Technician Login</h2>
+            <label>Username:</label>
+            <asp:TextBox ID="txtUsername" runat="server"></asp:TextBox><br />
+            <label>Password:</label>
+            <asp:TextBox ID="txtPassword" runat="server" TextMode="Password"></asp:TextBox><br />
+            <asp:Button ID="btnLogin" runat="server" Text="Login" OnClick="btnLogin_Click" />
+            <asp:Label ID="lblMessage" runat="server" ForeColor="Red"></asp:Label>
+        </div>
+    </form>
+</body>
+</html>
+
+
+=> TechnicianLogin.aspx.cs (Code-behind)
+   using System;
+using System.Linq;
+
+public partial class TechnicianLogin : System.Web.UI.Page
+{
+    protected void btnLogin_Click(object sender, EventArgs e)
+    {
+        using (var context = new ComplaintContext())
+        {
+            var user = context.Users.FirstOrDefault(u => u.Username == txtUsername.Text && u.Password == txtPassword.Text && u.Role == "Technician");
+
+            if (user != null)
+            {
+                Session["UserId"] = user.Id;
+                Response.Redirect("ViewComplaints.aspx");
+            }
+            else
+            {
+                lblMessage.Text = "Invalid credentials!";
+            }
+        }
+    }
+}
+
+=> 2.2 Registered User: Submit Complaint (SubmitComplaint.aspx)
+SubmitComplaint.aspx (UI)
+
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="SubmitComplaint.aspx.cs" Inherits="OnlineComplaintSystem.SubmitComplaint" %>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Submit Complaint</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div>
+            <h2>Submit Complaint</h2>
+            <label>Select Service:</label>
+            <asp:DropDownList ID="ddlService" runat="server"></asp:DropDownList><br />
+            <label>Description:</label>
+            <asp:TextBox ID="txtDescription" runat="server" TextMode="MultiLine"></asp:TextBox><br />
+            <asp:Button ID="btnSubmit" runat="server" Text="Submit Complaint" OnClick="btnSubmit_Click" />
+        </div>
+    </form>
+</body>
+</html>
+
+
+=> SubmitComplaint.aspx.cs (Code-behind)
+using System;
+using System.Linq;
+
+public partial class SubmitComplaint : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            using (var context = new ComplaintContext())
+            {
+                ddlService.DataSource = context.Services.ToList();
+                ddlService.DataTextField = "ServiceName";
+                ddlService.DataValueField = "Id";
+                ddlService.DataBind();
+            }
+        }
+    }
+
+    protected void btnSubmit_Click(object sender, EventArgs e)
+    {
+        using (var context = new ComplaintContext())
+        {
+            var complaint = new Complaint
+            {
+                Description = txtDescription.Text,
+                Status = "Pending",
+                UserId = (int)Session["UserId"], // Assuming the user is logged in
+                ServiceId = int.Parse(ddlService.SelectedValue)
+            };
+
+            context.Complaints.Add(complaint);
+            context.SaveChanges();
+            Response.Write("Complaint submitted successfully!");
+        }
+    }
+}
+
+=>2.3 Technician: View and Update Complaints (ViewComplaints.aspx)
+ViewComplaints.aspx (UI)
+
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="ViewComplaints.aspx.cs" Inherits="OnlineComplaintSystem.ViewComplaints" %>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>View Complaints</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <h2>Complaints List</h2>
+        <asp:GridView ID="gvComplaints" runat="server" AutoGenerateColumns="False" DataKeyNames="Id" OnRowCommand="gvComplaints_RowCommand">
+            <Columns>
+                <asp:BoundField DataField="Description" HeaderText="Description" />
+                <asp:BoundField DataField="Service.ServiceName" HeaderText="Service" />
+                <asp:BoundField DataField="Status" HeaderText="Status" />
+                <asp:ButtonField CommandName="Solve" Text="Mark as Solved" ButtonType="Button" />
+            </Columns>
+        </asp:GridView>
+    </form>
+</body>
+</html>
+
+
+=> ViewComplaints.aspx.cs (Code-behind)
+
+using System;
+using System.Linq;
+
+public partial class ViewComplaints : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            LoadComplaints();
+        }
+    }
+
+    private void LoadComplaints()
+    {
+        using (var context = new ComplaintContext())
+        {
+            gvComplaints.DataSource = context.Complaints.Include("Service").ToList();
+            gvComplaints.DataBind();
+        }
+    }
+
+    protected void gvComplaints_RowCommand(object sender, GridViewCommandEventArgs e)
+    {
+        if (e.CommandName == "Solve")
+        {
+            int complaintId = Convert.ToInt32(e.CommandArgument);
+
+            using (var context = new ComplaintContext())
+            {
+                var complaint = context.Complaints.Find(complaintId);
+                complaint.Status = "Solved";
+                context.SaveChanges();
+                LoadComplaints();
+            }
+        }
+    }
+}
+
+
+=> Step 3: Database Setup
+Web.config (Database Connection)
+Add the following connection string to your Web.config file:
+
+<connectionStrings>
+    <add name="ComplaintContext" 
+         connectionString="Data Source=YOUR_SERVER_NAME;Initial Catalog=OnlineComplaintDB;Integrated Security=True" 
+         providerName="System.Data.SqlClient" />
+</connectionStrings>
+

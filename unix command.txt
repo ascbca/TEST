@@ -1,0 +1,198 @@
+      ASSIGNMENT-1  
+
+
+
+1.Display the content of current directory. => $ mkdir d1       
+						$ cd d1      
+						$ cat >> f1      
+						my name is Sandhya 
+
+2. Show calender of january 1980     =>$ cal 1 1980
+
+3. Show the current working directory.     =>$ pwd 
+4. Display date and time in format shown in brackets ( Sun June 19,11:40PM ) 		=>$ date +"%a %B %d , %I : %M%p"  
+
+5. Display the below pattern with echo command \ \ \ \ \ \ \ \ \  	=>$ echo -e " \\ \n \\ \\ \\ \n \\ \\ \\ \\ \\" 
+
+6. Execute a command to know the kernel version of operating system you are working on  	=>$ uname -r 1.7.5(0.225/5/3) 
+
+7. Execute a command to know your terminal  	=>$ uname CYGWIN_NT-6.2-WOW64 
+
+8. Execute a command to identify all executables in current working directory. 	=>$ cat > sandhya.exe
+  
+9. Display a sorted list of files by last access time.		=>$ ls -ltu  
+
+10. Create five files named f1 to f5.  =>$ cat > f1
+ 
+11. Copy the content of f1 and f2 into f3.  =>$ cat f1 f2>f3      $ cat f3 
+
+12. Display all files from current directory having first and last character as number.  =>$ touch 1f0 1sp2 
+
+13. Display the list of all file names that contains only 3 latters. =>$ ls ???  
+
+14. Create a file named "-abc" in current working directory. =>$ cat > -abc hii hello  
+
+15. Count the number of characters of file "-abc".  =>$ wc -c -- -abc 
+
+16. Rename file "ex1" to "as1".  =>$ mv ex1 as1 
+
+17. Copy those files that must contains 3rd character in the file name as digit to the directory "xtemp".  =>$ mkdir  xtemp     
+													     $ cp ??[0-9]* ./xtemp    
+													     $ cd xtemp       
+												             $ ls
+ 
+18. Create directory named "helix", "apache".  =>$ mkdir helix apache
+
+19. Copy the "helix" directory to "tmp" directory. =>$ cp -R helix tmp 
+ 
+20. Move those files having last character as digit to the "apache".  =>$ cp -R helix tmp     $ cd apache     $ ls 
+
+21. Remove file "-abc". =>$ rm -- -abc
+
+
+                               
+ASSIGNMENT-2 
+
+ 1.list the content of currrent directory having file names as number. =>$ ls | grep -E '^[0-9]+$' 123  
+
+2. display the filename containing only alphabats as a names.  =>$ ls | grep -E '^[a-z A-Z]+$'abc 
+
+3. remove all files containing digit as the 2nd latter as their names. =>$ rm ?[0-9]*rm: d1: is a directory  
+
+4. create the file named " asd[0-9]".  =>$ ls>asd\[0-9]\* hello everyone 
+
+5. copy the content of file c- to c1,c2,c3.  =>$ cat > c- the moon     $ cat > c1     $ cat > c2     $ cat > c3     $ cat c1 c2 c3> c-
+
+6. display the date in the following format e.g. " Today's date is : Sat Jul 30 15:25:31 IST 2011" =>$ echo "Today's date is`date`" Today's date is Sun Aug 28 15:28:23 IST 2022
+
+  7. compare 2 files named sc1, sc2 and store the common content in file result. =>$ cat > sc1 abc def ghi  
+
+8. find how many number of lines from sc1 and sc2 are common.  =>$ comm -1 -2 sc1 sc2 |wc -l 2
+
+9. display only those files containing the more then 5 character as there names ( the file names having last two characters as digit) =>$ cat > abc12 i am abc     $ cat > psp01 i am psp     $ ls ???[0-9][0-9]abc12 psp01
+
+10. create the directory named "maxx" and copy all files having only capital letters. =>$ cp `ls [A-Z]` max  
+
+11. create a file named emp*  =>$ cat > emp\*      $ ls 
+
+12. make a list of employee in following order ( use vi editor ). empid empname post 1 abcd programmer 2 xyz manager  =>$ cat emp empid |empname |post 
+
+13. display only the last accessed file from current directory. =>$ ls -t  
+
+14. create file named emp_list having empid and date of joining.  => $ cut -d"|" -f1,4 emp > emp_list       $ cat emp_list 
+
+15. copy the content of file "emp*" in emp_master1,emp_master2  =>$ cp /emp* emp_master1      $ cp /emp* emp_master2 
+
+16. rename file emp_master2 to backup_emp  =>$ mv emp_master2 backup_emp 
+
+17. remove file "emp*"  =>$ rm /emp* 
+
+18. display the path of the directory where all your mail are stored. => $ echo $MAIL 
+
+19. create the following structure export |-- color |-- dir1 |-- file1.lst |-- m1 | |-- f1 | | `-- emp.lst | `-- f2 remain intact for the directory "d1" 
+   =>$ mkdir export      $ 																		
+     mkdir color dir m1 m2m3 dir2     
+     $ cat > fil1.txt       
+     $ cat > emp.txt mbbdfj      
+     $ cat > menu.txt      
+     $ cat > file123      
+    $  cat > file1      
+    $ cat > tmp      
+    cat > xyz.java      
+   $ ls      
+    DFD UNIX   asd[0-9]* c2    d1   emp    export   m2    psp01    sc2 xyz.java      
+    HJKU    abc    c-    c3   dir1   emp*    fil1.txt   m3   result    sps.php
+      M    abc12    c1   color dir2   emp_list   m1 maxx   sc1 vbe
+
+24. copy the content of file emp.lst to file123, make back up of file 'file123' and rename it with file_bkp  =>$ cp file123 
+
+25. display the content of "export" directory in a way like question-19 =>$ ls -1d */ -x $ color/:     $ dir1/: tmp     $ dir2/:     $ m1/:F1F2     $ m2/: File_bkp     $m3/:F1 
+
+ 26. display last modified file. =>$ ls -1t |head -n1 m2 
+
+27. make archive file of all the files having .lst extension  =>$ find . -name "*.lst" 
+
+28. move all .lst files to tmp directory  =>$ mv '*.lst' 
+
+29. provide the permissions to the file "color " in such a way that only the owner can perform read and write operation while group members and others can only execute a file.  =>$ chmod 611 
+
+30. change the ownership of file "tmp" to root  =>$ $sudo Pass:      #chown Anandi root      tmp #exit      $ 
+
+
+ ASSIGNMENT-3  
+
+1.write a command to display content of top 3 largest file in a working directory.  =>$ ls -s | head -n2 
+
+2. Count no. of words in lines 40 through 60 of file f1.txt. =>$ sed -n '1,2p' f1 | wc -w  
+
+3. Display all filenames not beginning with “.”. =>$ ls |grep ^[^.]  
+
+4. delete all special characters from file x1.  =>$ tr -cd '[a-zA-Z0-9\n]' <f1hii 
+
+5. Display i-node no of all files of current directory. =>$ ls -i 
+
+ 6. Display those lines of file f1 that contains exactly 50 characters in it.  =>$ grep -E'^.{20}' f2 
+
+7. Replace 'hello' with “HELLO” in input file fin.sh and write those lines to output file fout.sh =>$ cat f2  
+
+8. extract all username and their home directory form /etc/passwd file.  =>$ cat /etc/passwd | cut -d ':' -f 1,6  
+
+9. Locate lines of file where the second and second last character of the lines are same.  =>$ grep'^.\(.\).*\1.$' f2 
+
+10. Display all lines of files that contains “hello” pattern in it.  =>$ grep 'hello' `grep –l’
+
+11. Display all lines having “g*” pattern in it.  =>$ grep 'g\*' f3 
+
+12. Change modification time of file to Dec 25, 10:30 AM.  =>$ touch -t 08261957f1 
+
+13. List all files of working directory having at least 4 characters in filename.  =>$ find . -maxdepth 1 -type f -name '????*' -print 
+
+14. Execute a command to run a script hello.sh at tea time.  =>at hello.sh  
+
+15. Replace multiple spaces with a single space in file f1.  =>$ tr -s ' ' < f1 hii hello 
+
+16. Write a unix command to evalute an expression : 4*3.14+6  =>$ awk 'BEGIN {print4*3.14+6}'18.56 
+
+17. write a command to display all unique words of file f1.  =>$ tr ' ' '\n' <f1 | sort | uniq -u 
+
+18. Write a command to locate lines that begin and end with (.).  =>$ grep '^\..*\.$' f2 
+
+19. write a command to display all lines that contains 2 or more ^ symbol at beginning of line. => $ grep -E'^\^{2,}' f1 
+
+20. Write a command to replace all occurrences of “he” with “she” and “hello” with “hi” in file f1.  =>$ sed 's/he/she/' -e 's/hello/hii/' f1sed: s/he/she/:     $ sed's/he/she/' f2 Hii
+
+
+21. Display those lines having exactly 10 alphabates from file f1.  =>$ grep '^[A-Za-z]\{10\}$' f2 
+
+22. Copy file content of f1 to file f2 if f1 exist otherwise write error message to file f2. =>$ cp f1 f2  
+
+23. Search those files from current directory which have more than 5 links.  =>$ find . -links +5 - print 
+
+24. Display lines of file f1 that do not contain digit in it.  =>$ grep -v '[0-9]' f2 
+
+25. Replace all occurrences of “linux OS” with “unix OS” in file f1.  =>$ sed 's/linux os/unixos/g' f3 kevin 
+
+26. Display all line of file f1 having 3rd word as 'user '. =>$ grep '^[^ ]* [^ ]* user'f2  
+
+27. Display name of all files of working directory having pattern “The”.  =>$ grep -l 'The' * 
+
+28. Display lines of file f1 that begin with any capital letter. 
+ =>$ grep '^[A-Z]' f3 
+
+29. Write a sed command to extract first word of each line. Assuming that there is no white space character at beginning of line.  =>$ sed 's/ .*/ /g' f3 
+
+30. What does the following command do? grep f1 f2 f3  =>$grep -l "unix" f1.txt f2.txt f3.txt
+
+31. display only those lines of file f1 having length in between 30 to 50 characters.  =>$ grep'^.\{10,20\}$' f3 Gujan saxena 
+
+32. Display binary value of 12 using bc.  =>~$  echo "e(12)" | bc -l 
+
+33. Replace all occurrences of “hello” with “hi” and “he” with “she”.  =>$ sed 's/he/she/' -e's/hello/hii/' f1 sed: s/he/she/:      $ sed 's/he/she/' f2 Hii 
+
+34. Count number of words and lines of files whose filename begins with x.  =>$ find . -maxdepth 1 -type f -name 't*' -exec wc -wl {} \; 
+
+35. Write equivalent sed command of “sed '1,5d' f1”.  =>$ sed -n '1,5!p' f3
+
+ 36. Write equivalent IRE for the following regular expression - A* - A? =>$ grep 'A\{1,\}' f3
+
+

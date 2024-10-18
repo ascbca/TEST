@@ -1,0 +1,2019 @@
+//1.online perfume store
+//2. online sweet store 
+//3."Tattoo shop"
+//4.gift shoping
+//5."online bike service management "
+//6.real state system 
+
+
+
+
+1).
+create a webpage for online perfume store using php for the different user       
+admin user:- add perfumes
+guest user:- signup(this require only mobile no and password)
+customer : -   sign in 
+                     view all perfumes 
+
+
+
+CREATE DATABASE perfume_store;
+
+USE perfume_store;
+
+-- Table for perfumes
+CREATE TABLE perfumes (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    perfume_name VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL
+);
+
+-- Table for users
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mobile_no VARCHAR(15) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'customer') NOT NULL
+);
+
+=>1. Signup Page (signup.php)
+
+<?php
+include 'db_connect.php';  // Connect to the database
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $mobile_no = $_POST['mobile_no'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);  // Encrypt the password
+
+    // Check if mobile number already exists
+    $check_user_query = "SELECT * FROM users WHERE mobile_no = '$mobile_no'";
+    $result = mysqli_query($conn, $check_user_query);
+
+    if (mysqli_num_rows($result) > 0) {
+        echo "User already exists!";
+    } else {
+        // Insert new user
+        $query = "INSERT INTO users (mobile_no, password, role) VALUES ('$mobile_no', '$password', 'customer')";
+        if (mysqli_query($conn, $query)) {
+            echo "Signup successful!";
+        } else {
+            echo "Error: " . mysqli_error($conn);
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sign Up</title>
+</head>
+<body>
+    <h2>Sign Up</h2>
+    <form method="POST">
+        <label>Mobile Number:</label>
+        <input type="text" name="mobile_no" required>
+        <br>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">Sign Up</button>
+    </form>
+</body>
+</html>
+
+
+=> 2. Sign In Page (signin.php)
+
+<?php
+include 'db_connect.php';
+
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $mobile_no = $_POST['mobile_no'];
+    $password = $_POST['password'];
+
+    // Check if user exists
+    $query = "SELECT * FROM users WHERE mobile_no = '$mobile_no'";
+    $result = mysqli_query($conn, $query);
+    $user = mysqli_fetch_assoc($result);
+
+    if ($user && password_verify($password, $user['password'])) {
+        // Login successful
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['role'] = $user['role'];
+        header("Location: view_perfumes.php");
+        exit();
+    } else {
+        echo "Invalid mobile number or password!";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sign In</title>
+</head>
+<body>
+    <h2>Sign In</h2>
+    <form method="POST">
+        <label>Mobile Number:</label>
+        <input type="text" name="mobile_no" required>
+        <br>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">Sign In</button>
+    </form>
+</body>
+</html>
+
+
+=> 3. Admin Dashboard (add_perfume.php)
+
+<?php
+include 'db_connect.php';
+session_start();
+
+if ($_SESSION['role'] != 'admin') {
+    header("Location: signin.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $perfume_name = $_POST['perfume_name'];
+    $description = $_POST['description'];
+    $price = $_POST['price'];
+
+    // Insert perfume into the database
+    $query = "INSERT INTO perfumes (perfume_name, description, price) VALUES ('$perfume_name', '$description', '$price')";
+    if (mysqli_query($conn, $query)) {
+        echo "Perfume added successfully!";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add Perfume</title>
+</head>
+<body>
+    <h2>Add Perfume</h2>
+    <form method="POST">
+        <label>Perfume Name:</label>
+        <input type="text" name="perfume_name" required>
+        <br>
+        <label>Description:</label>
+        <textarea name="description" required></textarea>
+        <br>
+        <label>Price:</label>
+        <input type="text" name="price" required>
+        <br>
+        <button type="submit">Add Perfume</button>
+    </form>
+</body>
+</html>
+
+
+
+=> insert perfume
+
+INSERT INTO perfumes (perfume_name, description, price) 
+VALUES 
+('Chanel No. 5', 'A classic and elegant fragrance.', 120.00),
+('Dior Sauvage', 'A fresh and spicy scent.', 95.00),
+('Gucci Bloom', 'A floral fragrance for women.', 80.00);
+
+
+=> 4. View Perfumes Page (view_perfumes.php)
+
+<?php
+include 'db_connect.php';
+
+session_start();
+
+if (!isset($_SESSION['user_id'])) {
+    header("Location: signin.php");
+    exit();
+}
+
+// Fetch all perfumes
+$query = "SELECT * FROM perfumes";
+$result = mysqli_query($conn, $query);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>All Perfumes</title>
+</head>
+<body>
+    <h2>Perfume Store</h2>
+    <table border="1">
+        <tr>
+            <th>Perfume Name</th>
+            <th>Description</th>
+            <th>Price</th>
+        </tr>
+        <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+            <tr>
+                <td><?php echo $row['perfume_name']; ?></td>
+                <td><?php echo $row['description']; ?></td>
+                <td><?php echo $row['price']; ?></td>
+            </tr>
+        <?php } ?>
+    </table>
+</body>
+</html>
+
+
+
+Step 3: Database Connection File (db_connect.php)
+
+<?php
+$host = "localhost";   // Replace with your DB host
+$user = "root";        // Replace with your DB username
+$pass = "";            // Replace with your DB password
+$dbname = "perfume_store";  // Replace with your database name
+
+$conn = mysqli_connect($host, $user, $pass, $dbname);
+
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
+?>
+
+/*
+<?php 
+ 
+ 
+$servername="localhost";
+$username="root";
+$password="";
+$dbname="perfume_store";
+
+$conn = mysqli_connect($servername,$username,$password,$dbname);
+ if($conn){
+	 echo"ok";
+ }
+ else{
+	 echo "not ok";
+ }
+ 
+ ?>
+
+*/
+
+
+2).create a webpage for online sweet store using php for the different user.       
+admin user:-  login page , add sweet
+guest user:-search sweet based on price in php
+
+
+database =>
+CREATE DATABASE sweet_store;
+
+USE sweet_store;
+
+-- Table for storing sweets
+CREATE TABLE sweets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    sweet_name VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL
+);
+
+-- Table for storing admin users
+CREATE TABLE admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
+
+Step 2: Create the Admin Login Page
+The admin can log in to manage the sweets. Here’s the PHP script for the admin login page.
+
+=> Admin Login Page (admin_login.php)
+<?php
+include 'db_connect.php';
+
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Check if admin exists
+    $query = "SELECT * FROM admins WHERE username = '$username'";
+    $result = mysqli_query($conn, $query);
+    $admin = mysqli_fetch_assoc($result);
+
+    if ($admin && password_verify($password, $admin['password'])) {
+        // Login successful
+        $_SESSION['admin_id'] = $admin['id'];
+        header("Location: add_sweet.php");
+        exit();
+    } else {
+        echo "Invalid username or password!";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Login</title>
+</head>
+<body>
+    <h2>Admin Login</h2>
+    <form method="POST">
+        <label>Username:</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+
+Step 3: Create the Add Sweet Page for Admin
+This page allows the admin to add new sweets.
+
+=> Add Sweet Page (add_sweet.php)
+
+<?php
+include 'db_connect.php';
+session_start();
+
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $sweet_name = $_POST['sweet_name'];
+    $description = $_POST['description'];
+    $price = $_POST['price'];
+
+    // Insert the new sweet into the database
+    $query = "INSERT INTO sweets (sweet_name, description, price) VALUES ('$sweet_name', '$description', '$price')";
+    if (mysqli_query($conn, $query)) {
+        echo "Sweet added successfully!";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add Sweet</title>
+</head>
+<body>
+    <h2>Add Sweet</h2>
+    <form method="POST">
+        <label>Sweet Name:</label>
+        <input type="text" name="sweet_name" required>
+        <br>
+        <label>Description:</label>
+        <textarea name="description" required></textarea>
+        <br>
+        <label>Price:</label>
+        <input type="number" name="price" step="0.01" required>
+        <br>
+        <button type="submit">Add Sweet</button>
+    </form>
+</body>
+</html>
+
+Step 4: Create the Guest Search Page
+Guests can search for sweets based on price. Here’s the PHP script for the search page.
+
+=> Guest Search Page (search_sweets.php)
+<?php
+include 'db_connect.php';
+
+$sweets = [];
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $price = $_POST['price'];
+
+    // Query to search sweets based on the price
+    $query = "SELECT * FROM sweets WHERE price <= $price";
+    $result = mysqli_query($conn, $query);
+
+    while ($row = mysqli_fetch_assoc($result)) {
+        $sweets[] = $row;
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Search Sweets by Price</title>
+</head>
+<body>
+    <h2>Search Sweets</h2>
+    <form method="POST">
+        <label>Max Price:</label>
+        <input type="number" name="price" step="0.01" required>
+        <br>
+        <button type="submit">Search</button>
+    </form>
+
+    <?php if (!empty($sweets)) { ?>
+        <h3>Available Sweets:</h3>
+        <ul>
+            <?php foreach ($sweets as $sweet) { ?>
+                <li>
+                    <strong><?php echo $sweet['sweet_name']; ?></strong> - 
+                    <?php echo $sweet['description']; ?> - 
+                    $<?php echo $sweet['price']; ?>
+                </li>
+            <?php } ?>
+        </ul>
+    <?php } else if ($_SERVER['REQUEST_METHOD'] == 'POST') { ?>
+        <p>No sweets found under that price.</p>
+    <?php } ?>
+</body>
+</html>
+
+Step 5: Create the Database Connection File
+All pages need access to the database, so create a reusable database connection file.
+
+=> Database Connection File (db_connect.php)
+
+<?php
+$host = "localhost";   // Replace with your DB host
+$user = "root";        // Replace with your DB username
+$pass = "";            // Replace with your DB password
+$dbname = "sweet_store";  // Replace with your database name
+
+$conn = mysqli_connect($host, $user, $pass, $dbname);
+
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
+?>
+
+=> 
+Step 6: Insert Admin User and Sample Data
+You need to manually insert an admin user and some sweets into the database.
+
+Insert Admin User
+To insert an admin user, use the following SQL query. Replace the password_hash with your desired password encrypted with PASSWORD_BCRYPT.
+
+
+code :-
+INSERT INTO admins (username, password) VALUES ('admin', '$2y$10$FjVwMkQO9H5ciLkpQeOzQeXUMMC8nhFgmgtnNckZmZvgN63FlxtSG');
+
+
+=> insert sweet
+INSERT INTO sweets (sweet_name, description, price) 
+VALUES 
+('Laddu', 'Traditional Indian sweet.', 5.00),
+('Jalebi', 'Crispy, sweet, and syrupy.', 3.50),
+('Barfi', 'Milk-based sweet.', 4.00);
+
+
+
+
+
+
+
+3). 
+create a webpage for "Tattoo shop" using php for the different user       
+admin user:- add  tattoo designs , view contact us detail
+guest user:- view tattoo designs , 
+                   contact admin using his/her mobile number , email id and description
+
+
+=> 
+CREATE DATABASE tattoo_shop;
+
+USE tattoo_shop;
+
+-- Table to store tattoo designs
+CREATE TABLE tattoos (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    design_name VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    image_url VARCHAR(255) NOT NULL
+);
+
+-- Table for storing admin users
+CREATE TABLE admins (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
+-- Table to store guest contact messages
+CREATE TABLE contact_us (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    mobile_no VARCHAR(15) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+=> Step 2: Create Admin Login and Add Tattoo Pages
+
+1. Admin Login Page (admin_login.php)
+
+
+
+<?php
+include 'db_connect.php';
+
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Query to check if the admin exists
+    $query = "SELECT * FROM admins WHERE username = '$username'";
+    $result = mysqli_query($conn, $query);
+    $admin = mysqli_fetch_assoc($result);
+
+    if ($admin && password_verify($password, $admin['password'])) {
+        $_SESSION['admin_id'] = $admin['id'];
+        header("Location: add_tattoo.php");
+        exit();
+    } else {
+        echo "Invalid username or password!";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Login</title>
+</head>
+<body>
+    <h2>Admin Login</h2>
+    <form method="POST">
+        <label>Username:</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+
+=> 2. Add Tattoo Design Page (add_tattoo.php)
+<?php
+include 'db_connect.php';
+session_start();
+
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $design_name = $_POST['design_name'];
+    $description = $_POST['description'];
+    $image_url = $_POST['image_url'];
+
+    // Insert the tattoo design into the database
+    $query = "INSERT INTO tattoos (design_name, description, image_url) VALUES ('$design_name', '$description', '$image_url')";
+    if (mysqli_query($conn, $query)) {
+        echo "Tattoo design added successfully!";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add Tattoo Design</title>
+</head>
+<body>
+    <h2>Add Tattoo Design</h2>
+    <form method="POST">
+        <label>Design Name:</label>
+        <input type="text" name="design_name" required>
+        <br>
+        <label>Description:</label>
+        <textarea name="description" required></textarea>
+        <br>
+        <label>Image URL:</label>
+        <input type="text" name="image_url" required>
+        <br>
+        <button type="submit">Add Tattoo</button>
+    </form>
+</body>
+</html>
+
+
+=> 3. View Contact Us Details (view_contacts.php)
+
+<?php
+include 'db_connect.php';
+session_start();
+
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+
+// Fetch all contact us messages
+$query = "SELECT * FROM contact_us ORDER BY created_at DESC";
+$result = mysqli_query($conn, $query);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Contact Us Messages</title>
+</head>
+<body>
+    <h2>Contact Us Messages</h2>
+    <table border="1">
+        <tr>
+            <th>Mobile Number</th>
+            <th>Email</th>
+            <th>Description</th>
+            <th>Date</th>
+        </tr>
+        <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+            <tr>
+                <td><?php echo $row['mobile_no']; ?></td>
+                <td><?php echo $row['email']; ?></td>
+                <td><?php echo $row['description']; ?></td>
+                <td><?php echo $row['created_at']; ?></td>
+            </tr>
+        <?php } ?>
+    </table>
+</body>
+</html>
+
+
+=> Step 3: Create Guest Pages
+1. View Tattoo Designs Page (view_tattoos.php)
+<?php
+include 'db_connect.php';
+
+// Fetch all tattoo designs
+$query = "SELECT * FROM tattoos";
+$result = mysqli_query($conn, $query);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>View Tattoo Designs</title>
+</head>
+<body>
+    <h2>Available Tattoo Designs</h2>
+    <table border="1">
+        <tr>
+            <th>Design Name</th>
+            <th>Description</th>
+            <th>Image</th>
+        </tr>
+        <?php while ($row = mysqli_fetch_assoc($result)) { ?>
+            <tr>
+                <td><?php echo $row['design_name']; ?></td>
+                <td><?php echo $row['description']; ?></td>
+                <td><img src="<?php echo $row['image_url']; ?>" alt="Tattoo Design" width="100"></td>
+            </tr>
+        <?php } ?>
+    </table>
+</body>
+</html>
+
+=> 2. Contact Us Form (contact_us.php)
+<?php
+include 'db_connect.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $mobile_no = $_POST['mobile_no'];
+    $email = $_POST['email'];
+    $description = $_POST['description'];
+
+    // Insert the contact message into the database
+    $query = "INSERT INTO contact_us (mobile_no, email, description) VALUES ('$mobile_no', '$email', '$description')";
+    if (mysqli_query($conn, $query)) {
+        echo "Your message has been sent!";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Contact Us</title>
+</head>
+<body>
+    <h2>Contact Us</h2>
+    <form method="POST">
+        <label>Mobile Number:</label>
+        <input type="text" name="mobile_no" required>
+        <br>
+        <label>Email:</label>
+        <input type="email" name="email" required>
+        <br>
+        <label>Description:</label>
+        <textarea name="description" required></textarea>
+        <br>
+        <button type="submit">Send Message</button>
+    </form>
+</body>
+</html>
+
+=> Step 4: Database Connection File (db_connect.php)
+<?php
+$host = "localhost";   // Replace with your DB host
+$user = "root";        // Replace with your DB username
+$pass = "";            // Replace with your DB password
+$dbname = "tattoo_shop";  // Replace with your database name
+
+$conn = mysqli_connect($host, $user, $pass, $dbname);
+
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
+?>
+
+=> Step 5: Insert Admin and Sample Data
+INSERT INTO admins (username, password) 
+VALUES ('admin', '$2y$10$FjVwMkQO9H5ciLkpQeOzQeXUMMC8nhFgmgtnNckZmZvgN63FlxtSG');
+
+
+=> insert data
+INSERT INTO tattoos (design_name, description, image_url) 
+VALUES 
+('Dragon Tattoo', 'A fierce dragon tattoo design.', 'images/dragon_tattoo.jpg'),
+('Butterfly Tattoo', 'A delicate butterfly tattoo.', 'images/butterfly_tattoo.jpg');
+
+
+
+
+4). create a website for gift shoping of gift items using php. that provide facilities like:-   a) accept ing different  items  from admin with all validation.     
+b).  searching items according  to  category(chocolates , cards , etc.)  and price for user.
+
+
+CREATE DATABASE gift_shop;
+
+USE gift_shop;
+
+-- Table for storing gift categories
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+-- Table for storing gift items
+CREATE TABLE gifts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL,
+    category_id INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    description TEXT,
+    image_url VARCHAR(255),
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+-- Table for storing admin login credentials
+CREATE TABLE admin (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
+=> 
+To create a Gift Shopping Website using PHP, we will implement the following:
+
+Admin Module:
+
+Allows the admin to add gift items with validations.
+Admin must log in to access the panel for adding items.
+User Module:
+
+Users can search gift items based on category (e.g., chocolates, cards) and price range.
+Step-by-Step Guide:
+Step 1: Database Setup
+Create a database to store gift items and their categories.
+
+Create Database and Tables
+sql
+Copy code
+CREATE DATABASE gift_shop;
+
+USE gift_shop;
+
+-- Table for storing gift categories
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+-- Table for storing gift items
+CREATE TABLE gifts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL,
+    category_id INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    description TEXT,
+    image_url VARCHAR(255),
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+-- Table for storing admin login credentials
+CREATE TABLE admin (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+Step 2: Admin Login and Add Gift Items Pages
+
+1. Admin Login Page (admin_login.php)
+
+<?php
+include 'db_connect.php';
+
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Query to check if the admin exists
+    $query = "SELECT * FROM admin WHERE username = '$username'";
+    $result = mysqli_query($conn, $query);
+    $admin = mysqli_fetch_assoc($result);
+
+    if ($admin && password_verify($password, $admin['password'])) {
+        $_SESSION['admin_id'] = $admin['id'];
+        header("Location: add_gift.php");
+        exit();
+    } else {
+        echo "Invalid username or password!";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Login</title>
+</head>
+<body>
+    <h2>Admin Login</h2>
+    <form method="POST">
+        <label>Username:</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+
+=> 2. Add Gift Items Page (add_gift.php)
+
+<?php
+include 'db_connect.php';
+session_start();
+
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+
+// Fetch categories to show in dropdown
+$category_query = "SELECT * FROM categories";
+$category_result = mysqli_query($conn, $category_query);
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $item_name = $_POST['item_name'];
+    $category_id = $_POST['category_id'];
+    $price = $_POST['price'];
+    $description = $_POST['description'];
+    $image_url = $_POST['image_url'];
+
+    // Validation
+    if (empty($item_name) || empty($category_id) || empty($price) || !is_numeric($price)) {
+        echo "Please fill all fields correctly.";
+    } else {
+        // Insert the new gift item into the database
+        $query = "INSERT INTO gifts (item_name, category_id, price, description, image_url) 
+                  VALUES ('$item_name', '$category_id', '$price', '$description', '$image_url')";
+        if (mysqli_query($conn, $query)) {
+            echo "Gift item added successfully!";
+        } else {
+            echo "Error: " . mysqli_error($conn);
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add Gift Item</title>
+</head>
+<body>
+    <h2>Add Gift Item</h2>
+    <form method="POST">
+        <label>Item Name:</label>
+        <input type="text" name="item_name" required>
+        <br>
+        <label>Category:</label>
+        <select name="category_id" required>
+            <?php while ($category = mysqli_fetch_assoc($category_result)) { ?>
+                <option value="<?php echo $category['id']; ?>"><?php echo $category['name']; ?></option>
+            <?php } ?>
+        </select>
+        <br>
+        <label>Price:</label>
+        <input type="text" name="price" required>
+        <br>
+        <label>Description:</label>
+        <textarea name="description"></textarea>
+        <br>
+        <label>Image URL:</label>
+        <input type="text" name="image_url">
+        <br>
+        <button type="submit">Add Gift</button>
+    </form>
+</body>
+</html>
+
+=> Step 3: User Search and Display Pages
+
+1. Search Gifts by Category and Price (search_gifts.php)
+<?php
+include 'db_connect.php';
+
+// Fetch categories for the search form
+$category_query = "SELECT * FROM categories";
+$category_result = mysqli_query($conn, $category_query);
+
+$gifts = [];
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $category_id = $_POST['category_id'];
+    $min_price = $_POST['min_price'];
+    $max_price = $_POST['max_price'];
+
+    // Construct query to fetch gifts based on search criteria
+    $query = "SELECT * FROM gifts WHERE category_id = '$category_id' AND price BETWEEN '$min_price' AND '$max_price'";
+    $gifts_result = mysqli_query($conn, $query);
+
+    while ($row = mysqli_fetch_assoc($gifts_result)) {
+        $gifts[] = $row;
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Search Gifts</title>
+</head>
+<body>
+    <h2>Search for Gifts</h2>
+    <form method="POST">
+        <label>Category:</label>
+        <select name="category_id" required>
+            <?php while ($category = mysqli_fetch_assoc($category_result)) { ?>
+                <option value="<?php echo $category['id']; ?>"><?php echo $category['name']; ?></option>
+            <?php } ?>
+        </select>
+        <br>
+        <label>Min Price:</label>
+        <input type="text" name="min_price" required>
+        <br>
+        <label>Max Price:</label>
+        <input type="text" name="max_price" required>
+        <br>
+        <button type="submit">Search</button>
+    </form>
+
+    <?php if (!empty($gifts)) { ?>
+        <h3>Gift Items:</h3>
+        <table border="1">
+            <tr>
+                <th>Item Name</th>
+                <th>Price</th>
+                <th>Description</th>
+                <th>Image</th>
+            </tr>
+            <?php foreach ($gifts as $gift) { ?>
+                <tr>
+                    <td><?php echo $gift['item_name']; ?></td>
+                    <td><?php echo $gift['price']; ?></td>
+                    <td><?php echo $gift['description']; ?></td>
+                    <td><img src="<?php echo $gift['image_url']; ?>" width="100"></td>
+                </tr>
+            <?php } ?>
+        </table>
+    <?php } ?>
+</body>
+</html>
+
+=> Step 4: Database Connection File (db_connect.php)
+
+<?php
+$host = "localhost";   // Replace with your DB host
+$user = "root";        // Replace with your DB username
+$pass = "";            // Replace with your DB password
+$dbname = "gift_shop";  // Replace with your database name
+
+$conn = mysqli_connect($host, $user, $pass, $dbname);
+
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
+?>
+
+=> 
+To create a Gift Shopping Website using PHP, we will implement the following:
+
+Admin Module:
+
+Allows the admin to add gift items with validations.
+Admin must log in to access the panel for adding items.
+User Module:
+
+Users can search gift items based on category (e.g., chocolates, cards) and price range.
+Step-by-Step Guide:
+Step 1: Database Setup
+Create a database to store gift items and their categories.
+
+Create Database and Tables
+sql
+Copy code
+CREATE DATABASE gift_shop;
+
+USE gift_shop;
+
+-- Table for storing gift categories
+CREATE TABLE categories (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL
+);
+
+-- Table for storing gift items
+CREATE TABLE gifts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL,
+    category_id INT NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    description TEXT,
+    image_url VARCHAR(255),
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+-- Table for storing admin login credentials
+CREATE TABLE admin (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+Step 2: Admin Login and Add Gift Items Pages
+1. Admin Login Page (admin_login.php)
+This page allows the admin to log in and access the dashboard.
+
+php
+Copy code
+<?php
+include 'db_connect.php';
+
+session_start();
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Query to check if the admin exists
+    $query = "SELECT * FROM admin WHERE username = '$username'";
+    $result = mysqli_query($conn, $query);
+    $admin = mysqli_fetch_assoc($result);
+
+    if ($admin && password_verify($password, $admin['password'])) {
+        $_SESSION['admin_id'] = $admin['id'];
+        header("Location: add_gift.php");
+        exit();
+    } else {
+        echo "Invalid username or password!";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Admin Login</title>
+</head>
+<body>
+    <h2>Admin Login</h2>
+    <form method="POST">
+        <label>Username:</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+2. Add Gift Items Page (add_gift.php)
+Admin can add new gift items after logging in.
+
+php
+Copy code
+<?php
+include 'db_connect.php';
+session_start();
+
+if (!isset($_SESSION['admin_id'])) {
+    header("Location: admin_login.php");
+    exit();
+}
+
+// Fetch categories to show in dropdown
+$category_query = "SELECT * FROM categories";
+$category_result = mysqli_query($conn, $category_query);
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $item_name = $_POST['item_name'];
+    $category_id = $_POST['category_id'];
+    $price = $_POST['price'];
+    $description = $_POST['description'];
+    $image_url = $_POST['image_url'];
+
+    // Validation
+    if (empty($item_name) || empty($category_id) || empty($price) || !is_numeric($price)) {
+        echo "Please fill all fields correctly.";
+    } else {
+        // Insert the new gift item into the database
+        $query = "INSERT INTO gifts (item_name, category_id, price, description, image_url) 
+                  VALUES ('$item_name', '$category_id', '$price', '$description', '$image_url')";
+        if (mysqli_query($conn, $query)) {
+            echo "Gift item added successfully!";
+        } else {
+            echo "Error: " . mysqli_error($conn);
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add Gift Item</title>
+</head>
+<body>
+    <h2>Add Gift Item</h2>
+    <form method="POST">
+        <label>Item Name:</label>
+        <input type="text" name="item_name" required>
+        <br>
+        <label>Category:</label>
+        <select name="category_id" required>
+            <?php while ($category = mysqli_fetch_assoc($category_result)) { ?>
+                <option value="<?php echo $category['id']; ?>"><?php echo $category['name']; ?></option>
+            <?php } ?>
+        </select>
+        <br>
+        <label>Price:</label>
+        <input type="text" name="price" required>
+        <br>
+        <label>Description:</label>
+        <textarea name="description"></textarea>
+        <br>
+        <label>Image URL:</label>
+        <input type="text" name="image_url">
+        <br>
+        <button type="submit">Add Gift</button>
+    </form>
+</body>
+</html>
+Step 3: User Search and Display Pages
+1. Search Gifts by Category and Price (search_gifts.php)
+This page allows users to search for gift items based on their category and price range.
+
+php
+Copy code
+<?php
+include 'db_connect.php';
+
+// Fetch categories for the search form
+$category_query = "SELECT * FROM categories";
+$category_result = mysqli_query($conn, $category_query);
+
+$gifts = [];
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $category_id = $_POST['category_id'];
+    $min_price = $_POST['min_price'];
+    $max_price = $_POST['max_price'];
+
+    // Construct query to fetch gifts based on search criteria
+    $query = "SELECT * FROM gifts WHERE category_id = '$category_id' AND price BETWEEN '$min_price' AND '$max_price'";
+    $gifts_result = mysqli_query($conn, $query);
+
+    while ($row = mysqli_fetch_assoc($gifts_result)) {
+        $gifts[] = $row;
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Search Gifts</title>
+</head>
+<body>
+    <h2>Search for Gifts</h2>
+    <form method="POST">
+        <label>Category:</label>
+        <select name="category_id" required>
+            <?php while ($category = mysqli_fetch_assoc($category_result)) { ?>
+                <option value="<?php echo $category['id']; ?>"><?php echo $category['name']; ?></option>
+            <?php } ?>
+        </select>
+        <br>
+        <label>Min Price:</label>
+        <input type="text" name="min_price" required>
+        <br>
+        <label>Max Price:</label>
+        <input type="text" name="max_price" required>
+        <br>
+        <button type="submit">Search</button>
+    </form>
+
+    <?php if (!empty($gifts)) { ?>
+        <h3>Gift Items:</h3>
+        <table border="1">
+            <tr>
+                <th>Item Name</th>
+                <th>Price</th>
+                <th>Description</th>
+                <th>Image</th>
+            </tr>
+            <?php foreach ($gifts as $gift) { ?>
+                <tr>
+                    <td><?php echo $gift['item_name']; ?></td>
+                    <td><?php echo $gift['price']; ?></td>
+                    <td><?php echo $gift['description']; ?></td>
+                    <td><img src="<?php echo $gift['image_url']; ?>" width="100"></td>
+                </tr>
+            <?php } ?>
+        </table>
+    <?php } ?>
+</body>
+</html>
+Step 4: Database Connection File (db_connect.php)
+Here’s a reusable PHP file to connect to the database.
+
+php
+Copy code
+<?php
+$host = "localhost";   // Replace with your DB host
+$user = "root";        // Replace with your DB username
+$pass = "";            // Replace with your DB password
+$dbname = "gift_shop";  // Replace with your database name
+
+$conn = mysqli_connect($host, $user, $pass, $dbname);
+
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
+?>
+
+
+Step 5: Insert Admin and Category Data
+Insert admin and category data for gifts.
+
+Insert Admin User
+Use this SQL query to add an admin user:
+
+INSERT INTO admin (username, password) 
+VALUES ('admin', '$2y$10$5g/aLOA5Bp4cFzTLn6Oh3Ot7FgLxSYgTy.0LPsqLBuLsz9RhnRUve');  -- password is "admin"
+
+=> Insert Categories
+
+INSERT INTO categories (name) 
+VALUES ('Chocolates'), ('Cards'), ('Flowers'), ('Toys'), ('Gift Baskets');
+
+
+
+5). create a website using php for "online bike service management " which maintain information like service type, date ,time , customer_name  , model_name , etc. in database.                             
+provide facility:-  booking service , cancel booking , search for service history
+
+CREATE DATABASE bike_service;
+
+USE bike_service;
+
+-- Table for storing service types
+CREATE TABLE service_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type_name VARCHAR(100) NOT NULL
+);
+
+-- Table for storing customer service bookings
+CREATE TABLE service_bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL,
+    model_name VARCHAR(100) NOT NULL,
+    service_type_id INT NOT NULL,
+    booking_date DATE NOT NULL,
+    booking_time TIME NOT NULL,
+    status ENUM('Booked', 'Cancelled') DEFAULT 'Booked',
+    FOREIGN KEY (service_type_id) REFERENCES service_types(id)
+);
+
+
+To create an Online Bike Service Management website using PHP, we will implement the following features:
+
+Service Management:
+Add service types (e.g., oil change, tire rotation).
+Allow customers to book, cancel, and search for their service history.
+Step-by-Step Guide:
+Step 1: Database Setup
+Create a database to store service information and customer details.
+
+Create Database and Tables
+sql
+Copy code
+CREATE DATABASE bike_service;
+
+USE bike_service;
+
+-- Table for storing service types
+CREATE TABLE service_types (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    type_name VARCHAR(100) NOT NULL
+);
+
+-- Table for storing customer service bookings
+CREATE TABLE service_bookings (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(100) NOT NULL,
+    model_name VARCHAR(100) NOT NULL,
+    service_type_id INT NOT NULL,
+    booking_date DATE NOT NULL,
+    booking_time TIME NOT NULL,
+    status ENUM('Booked', 'Cancelled') DEFAULT 'Booked',
+    FOREIGN KEY (service_type_id) REFERENCES service_types(id)
+);
+
+
+Step 2: PHP Files Structure
+Create the following PHP files in your project directory:
+
+db_connect.php: To handle database connections.
+add_service.php: To add service types (for admin).
+book_service.php: To book a service.
+cancel_service.php: To cancel a booking.
+service_history.php: To view service history.
+admin_login.php: To log in as an admin (if necessary).
+
+Step 3: Database Connection File (db_connect.php)
+
+<?php
+$host = "localhost";   // Replace with your DB host
+$user = "root";        // Replace with your DB username
+$pass = "";            // Replace with your DB password
+$dbname = "bike_service";  // Replace with your database name
+
+$conn = mysqli_connect($host, $user, $pass, $dbname);
+
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
+?>
+
+Step 4: Add Service Types (add_service.php)
+
+<?php
+include 'db_connect.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $type_name = $_POST['type_name'];
+
+    // Validation
+    if (empty($type_name)) {
+        echo "Please enter a service type.";
+    } else {
+        // Insert the new service type into the database
+        $query = "INSERT INTO service_types (type_name) VALUES ('$type_name')";
+        if (mysqli_query($conn, $query)) {
+            echo "Service type added successfully!";
+        } else {
+            echo "Error: " . mysqli_error($conn);
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add Service Type</title>
+</head>
+<body>
+    <h2>Add Service Type</h2>
+    <form method="POST">
+        <label>Service Type Name:</label>
+        <input type="text" name="type_name" required>
+        <br>
+        <button type="submit">Add Service</button>
+    </form>
+</body>
+</html>
+
+Step 5: Book a Service (book_service.php)
+
+<?php
+include 'db_connect.php';
+
+$service_types = mysqli_query($conn, "SELECT * FROM service_types");
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $customer_name = $_POST['customer_name'];
+    $model_name = $_POST['model_name'];
+    $service_type_id = $_POST['service_type_id'];
+    $booking_date = $_POST['booking_date'];
+    $booking_time = $_POST['booking_time'];
+
+    // Validation
+    if (empty($customer_name) || empty($model_name) || empty($service_type_id) || empty($booking_date) || empty($booking_time)) {
+        echo "Please fill all fields.";
+    } else {
+        // Insert booking into the database
+        $query = "INSERT INTO service_bookings (customer_name, model_name, service_type_id, booking_date, booking_time) 
+                  VALUES ('$customer_name', '$model_name', '$service_type_id', '$booking_date', '$booking_time')";
+        if (mysqli_query($conn, $query)) {
+            echo "Service booked successfully!";
+        } else {
+            echo "Error: " . mysqli_error($conn);
+        }
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Book Service</title>
+</head>
+<body>
+    <h2>Book a Bike Service</h2>
+    <form method="POST">
+        <label>Customer Name:</label>
+        <input type="text" name="customer_name" required>
+        <br>
+        <label>Model Name:</label>
+        <input type="text" name="model_name" required>
+        <br>
+        <label>Service Type:</label>
+        <select name="service_type_id" required>
+            <?php while ($service_type = mysqli_fetch_assoc($service_types)) { ?>
+                <option value="<?php echo $service_type['id']; ?>"><?php echo $service_type['type_name']; ?></option>
+            <?php } ?>
+        </select>
+        <br>
+        <label>Booking Date:</label>
+        <input type="date" name="booking_date" required>
+        <br>
+        <label>Booking Time:</label>
+        <input type="time" name="booking_time" required>
+        <br>
+        <button type="submit">Book Service</button>
+    </form>
+</body>
+</html>
+
+
+Step 6: Cancel a Booking (cancel_service.php)
+
+<?php
+include 'db_connect.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $booking_id = $_POST['booking_id'];
+
+    // Update the booking status to Cancelled
+    $query = "UPDATE service_bookings SET status='Cancelled' WHERE id='$booking_id'";
+    if (mysqli_query($conn, $query)) {
+        echo "Booking cancelled successfully!";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+
+// Fetch all bookings for the customer
+$bookings = mysqli_query($conn, "SELECT * FROM service_bookings WHERE status='Booked'");
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Cancel Service</title>
+</head>
+<body>
+    <h2>Cancel a Booking</h2>
+    <form method="POST">
+        <label>Select Booking:</label>
+        <select name="booking_id" required>
+            <?php while ($booking = mysqli_fetch_assoc($bookings)) { ?>
+                <option value="<?php echo $booking['id']; ?>">
+                    <?php echo $booking['customer_name'] . " - " . $booking['model_name'] . " on " . $booking['booking_date'] . " at " . $booking['booking_time']; ?>
+                </option>
+            <?php } ?>
+        </select>
+        <br>
+        <button type="submit">Cancel Booking</button>
+    </form>
+</body>
+</html>
+
+
+Step 7: Service History (service_history.php)
+
+<?php
+include 'db_connect.php';
+
+$customer_name = '';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $customer_name = $_POST['customer_name'];
+}
+
+// Fetch service history for the customer
+$query = "SELECT sb.*, st.type_name FROM service_bookings sb 
+          JOIN service_types st ON sb.service_type_id = st.id 
+          WHERE sb.customer_name LIKE '%$customer_name%'";
+$history_result = mysqli_query($conn, $query);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Service History</title>
+</head>
+<body>
+    <h2>Service History</h2>
+    <form method="POST">
+        <label>Customer Name:</label>
+        <input type="text" name="customer_name" value="<?php echo $customer_name; ?>" required>
+        <button type="submit">Search</button>
+    </form>
+
+    <?php if (mysqli_num_rows($history_result) > 0) { ?>
+        <table border="1">
+            <tr>
+                <th>Customer Name</th>
+                <th>Model Name</th>
+                <th>Service Type</th>
+                <th>Booking Date</th>
+                <th>Booking Time</th>
+                <th>Status</th>
+            </tr>
+            <?php while ($row = mysqli_fetch_assoc($history_result)) { ?>
+                <tr>
+                    <td><?php echo $row['customer_name']; ?></td>
+                    <td><?php echo $row['model_name']; ?></td>
+                    <td><?php echo $row['type_name']; ?></td>
+                    <td><?php echo $row['booking_date']; ?></td>
+                    <td><?php echo $row['booking_time']; ?></td>
+                    <td><?php echo $row['status']; ?></td>
+                </tr>
+            <?php } ?>
+        </table>
+    <?php } else { ?>
+        <p>No service history found.</p>
+    <?php } ?>
+</body>
+</html>
+
+6). real state system 
+
+database:-
+CREATE DATABASE real_estate;
+
+USE real_estate;
+
+-- Table for storing user roles
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'agent', 'user') DEFAULT 'user'
+);
+
+-- Table for storing property listings
+CREATE TABLE properties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    description TEXT NOT NULL,
+    location VARCHAR(100) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    image VARCHAR(255) DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+=> 2. File Structure
+Create the following PHP files in your project directory:
+
+db_connect.php: Database connection.
+register.php: User registration.
+login.php: User login.
+add_property.php: Add new property listings.
+edit_property.php: Edit existing property listings.
+delete_property.php: Delete property listings.
+view_properties.php: View property listings.
+search_properties.php: Search for properties.
+
+
+
+=> 3. Database Connection File (db_connect.php)
+<?php
+$host = "localhost";   // Replace with your DB host
+$user = "root";        // Replace with your DB username
+$pass = "";            // Replace with your DB password
+$dbname = "real_estate";  // Replace with your database name
+
+$conn = mysqli_connect($host, $user, $pass, $dbname);
+
+if (!$conn) {
+    die("Database connection failed: " . mysqli_connect_error());
+}
+?>
+=> 4. User Registration (register.php)
+<?php
+include 'db_connect.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $role = $_POST['role'];
+
+    // Insert the new user into the database
+    $query = "INSERT INTO users (username, password, role) VALUES ('$username', '$password', '$role')";
+    if (mysqli_query($conn, $query)) {
+        echo "User registered successfully!";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Register</title>
+</head>
+<body>
+    <h2>Register</h2>
+    <form method="POST">
+        <label>Username:</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+        <br>
+        <label>Role:</label>
+        <select name="role" required>
+            <option value="agent">Agent</option>
+            <option value="admin">Admin</option>
+            <option value="user">User</option>
+        </select>
+        <br>
+        <button type="submit">Register</button>
+    </form>
+</body>
+</html>
+
+=> 5. User Login (login.php)
+<?php
+session_start();
+include 'db_connect.php';
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+
+    // Check credentials
+    $query = "SELECT * FROM users WHERE username='$username'";
+    $result = mysqli_query($conn, $query);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $user = mysqli_fetch_assoc($result);
+        if (password_verify($password, $user['password'])) {
+            $_SESSION['user_id'] = $user['id'];
+            $_SESSION['role'] = $user['role'];
+            header("Location: view_properties.php");
+            exit();
+        } else {
+            echo "Invalid password.";
+        }
+    } else {
+        echo "User not found.";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h2>Login</h2>
+    <form method="POST">
+        <label>Username:</label>
+        <input type="text" name="username" required>
+        <br>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+
+=> 6. Add Property (add_property.php)
+<?php
+session_start();
+include 'db_connect.php';
+
+if ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'agent') {
+    header("Location: login.php");
+    exit();
+}
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $title = $_POST['title'];
+    $description = $_POST['description'];
+    $location = $_POST['location'];
+    $price = $_POST['price'];
+
+    // Handle image upload
+    $image = '';
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $target_dir = "uploads/";
+        $target_file = $target_dir . basename($_FILES["image"]["name"]);
+        move_uploaded_file($_FILES["image"]["tmp_name"], $target_file);
+        $image = $target_file;
+    }
+
+    // Insert property into the database
+    $query = "INSERT INTO properties (title, description, location, price, image) 
+              VALUES ('$title', '$description', '$location', '$price', '$image')";
+    if (mysqli_query($conn, $query)) {
+        echo "Property added successfully!";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Add Property</title>
+</head>
+<body>
+    <h2>Add Property</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Title:</label>
+        <input type="text" name="title" required>
+        <br>
+        <label>Description:</label>
+        <textarea name="description" required></textarea>
+        <br>
+        <label>Location:</label>
+        <input type="text" name="location" required>
+        <br>
+        <label>Price:</label>
+        <input type="number" name="price" required>
+        <br>
+        <label>Image:</label>
+        <input type="file" name="image" required>
+        <br>
+        <button type="submit">Add Property</button>
+    </form>
+</body>
+</html>
+
+=> 7. View Properties (view_properties.php)
+<?php
+include 'db_connect.php';
+
+$query = "SELECT * FROM properties";
+$result = mysqli_query($conn, $query);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>View Properties</title>
+</head>
+<body>
+    <h2>Available Properties</h2>
+    <table border="1">
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Location</th>
+            <th>Price</th>
+            <th>Image</th>
+            <th>Actions</th>
+        </tr>
+        <?php while ($property = mysqli_fetch_assoc($result)) { ?>
+            <tr>
+                <td><?php echo $property['title']; ?></td>
+                <td><?php echo $property['description']; ?></td>
+                <td><?php echo $property['location']; ?></td>
+                <td><?php echo $property['price']; ?></td>
+                <td><img src="<?php echo $property['image']; ?>" width="100" height="100"></td>
+                <td>
+                    <a href="edit_property.php?id=<?php echo $property['id']; ?>">Edit</a>
+                    <a href="delete_property.php?id=<?php echo $property['id']; ?>">Delete</a>
+                </td>
+            </tr>
+        <?php } ?>
+    </table>
+</body>
+</html>
+
+=> 8. Edit Property (edit_property.php)
+
+<?php
+session_start();
+include 'db_connect.php';
+
+if ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'agent') {
+    header("Location: login.php");
+    exit();
+}
+
+$id = $_GET['id'];
+$query = "SELECT * FROM properties WHERE id=$id";
+$result = mysqli_query($conn, $query);
+$property = mysqli_fetch_assoc($result);
+
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $title = $_POST['title'];
+    $description = $_POST['description'];
+    $location = $_POST['location'];
+    $price = $_POST['price'];
+
+    // Handle image upload if a new image is provided
+    if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
+        $target_dir = "uploads/";
+        $target_file = $target_dir . basename($_FILES["image"]["name"]);
+        move_uploaded_file($_FILES["image"]["tmp_name"], $target_file);
+        $image = $target_file;
+        $query = "UPDATE properties SET title='$title', description='$description', location='$location', price='$price', image='$image' WHERE id=$id";
+    } else {
+        $query = "UPDATE properties SET title='$title', description='$description', location='$location', price='$price' WHERE id=$id";
+    }
+
+    if (mysqli_query($conn, $query)) {
+        echo "Property updated successfully!";
+        header("Location: view_properties.php");
+        exit();
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Edit Property</title>
+</head>
+<body>
+    <h2>Edit Property</h2>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Title:</label>
+        <input type="text" name="title" value="<?php echo $property['title']; ?>" required>
+        <br>
+        <label>Description:</label>
+        <textarea name="description" required><?php echo $property['description']; ?></textarea>
+        <br>
+        <label>Location:</label>
+        <input type="text" name="location" value="<?php echo $property['location']; ?>" required>
+        <br>
+        <label>Price:</label>
+        <input type="number" name="price" value="<?php echo $property['price']; ?>" required>
+        <br>
+        <label>Image:</label>
+        <input type="file" name="image">
+        <br>
+        <button type="submit">Update Property</button>
+    </form>
+</body>
+</html>
+
+=>9. Delete Property (delete_property.php)
+
+<?php
+session_start();
+include 'db_connect.php';
+
+if ($_SESSION['role'] !== 'admin' && $_SESSION['role'] !== 'agent') {
+    header("Location: login.php");
+    exit();
+}
+
+$id = $_GET['id'];
+$query = "DELETE FROM properties WHERE id=$id";
+if (mysqli_query($conn, $query)) {
+    echo "Property deleted successfully!";
+} else {
+    echo "Error: " . mysqli_error($conn);
+}
+
+header("Location: view_properties.php");
+exit();
+?>
+
+=> 10. Search Properties (search_properties.php)
+<?php
+include 'db_connect.php';
+
+$searchQuery = "";
+if (isset($_GET['search'])) {
+    $searchQuery = $_GET['search'];
+}
+
+$query = "SELECT * FROM properties WHERE title LIKE '%$searchQuery%' OR location LIKE '%$searchQuery%'";
+$result = mysqli_query($conn, $query);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Search Properties</title>
+</head>
+<body>
+    <h2>Search Properties</h2>
+    <form method="GET">
+        <input type="text" name="search" placeholder="Search by title or location" value="<?php echo $searchQuery; ?>">
+        <button type="submit">Search</button>
+    </form>
+
+    <table border="1">
+        <tr>
+            <th>Title</th>
+            <th>Description</th>
+            <th>Location</th>
+            <th>Price</th>
+            <th>Image</th>
+        </tr>
+        <?php while ($property = mysqli_fetch_assoc($result)) { ?>
+            <tr>
+                <td><?php echo $property['title']; ?></td>
+                <td><?php echo $property['description']; ?></td>
+                <td><?php echo $property['location']; ?></td>
+                <td><?php echo $property['price']; ?></td>
+                <td><img src="<?php echo $property['image']; ?>" width="100" height="100"></td>
+            </tr>
+        <?php } ?>
+    </table>
+</body>
+</html>
+
+
+output- 
+view 
+
+Title	Description	Location	Price	Image	Actions
+Beautiful Home	3 bed, 2 bath house	New York	$300,000	
+[Edit] [Delete]
+Cozy Apartment	2 bed apartment	Los Angeles	$200,000	
+[Edit] [Delete]
+
+

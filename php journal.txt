@@ -1,0 +1,1290 @@
+
+ 1.Create Following registration form. 
+Student Name,Student Password,Confirm Password,Enter Mobile No,Select Course,Select Hobbies,Address,Select City 
+
+
+
+	Registration.php
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration</title>
+</head>
+<body>
+    <center><h2>Registration Form</h2></center>
+    <form action="process.php" method="POST">
+	<table><center>
+        <label for="name">Student Name:</label><br>
+        <input type="text" name="student_name" required><br><br>
+
+        <label for="password">Student Password:</label><br>
+        <input type="password" name="student_password" required><br><br>
+
+        <label for="confirm_password">Confirm Password:</label><br>
+        <input type="password" name="confirm_password" required><br><br>
+
+        <label for="mobile">Enter Mobile No:</label><br>
+        <input type="text" name="mobile" required pattern="\d+"><br><br>
+        <label for="course">Select Course:</label><br>
+        <select name="course" required>
+            <option value="">--Select Course--</option>
+            <option value="Computer Science">Computer Science</option>
+            <option value="Engineering">Engineering</option>
+            <option value="Information Technology">Information Technology</option>
+        </select><br><br>
+
+        <label>Select Hobbies:</label><br>
+		<input type="checkbox" name="hobbies[]" value="writing">writing<br>
+        <input type="checkbox" name="hobbies[]" value="Reading">Reading<br>
+		<input type="checkbox" name="hobbies[]" value="drawing">drawing<br>
+        <input type="checkbox" name="hobbies[]" value="dancing">dancing<br>
+        <input type="checkbox" name="hobbies[]" value="Music">Music<br>     
+        <br><br>
+
+  <label for="address">Address:</label><br>
+        <textarea name="address" required></textarea><br><br>
+        <label for="city">Select City:</label><br>
+        <select name="city" required>
+            <option value="">--Select City--</option>
+            <option value="New York">New York</option>
+            <option value="Chicago">Chicago</option>
+            <option value="Los Angeles">Los Angeles</option>   
+
+        </select><br><br>
+ <input type="submit" name="submit" value="Registration">
+		</center></table>
+    </form></body>
+</html>
+
+Output:-
+
+ 
+
+
+
+
+Do Following validations: 
+1.All fields must be filled. 
+2.Length of password must be minimum of 8 character. 
+3.Password and confirm password should be same. 
+4.Enter only digit in mobile number. 
+5.Must have to select at least one hobby. 
+6.After validation display student data in tabular formate in second page.
+
+	Process.php
+
+
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Get the form data
+    $student_name = $_POST['student_name'];
+    $student_password = $_POST['student_password'];
+    $confirm_password = $_POST['confirm_password'];
+    $mobile = $_POST['mobile'];
+    $course = $_POST['course'];
+    $hobbies = isset($_POST['hobbies']) ? $_POST['hobbies'] : [];
+    $address = $_POST['address'];
+    $city = $_POST['city'];
+
+    // Validation flags
+    $errors = [];
+
+    // 1. All fields must be filled
+    if (empty($student_name) || empty($student_password) || empty($confirm_password) || empty($mobile) || empty($course) || empty($address) || empty($city)) {
+        $errors[] = "All fields must be filled.";
+    }
+
+    // 2. Password must be at least 8 characters long
+    if (strlen($student_password) < 8) {
+        $errors[] = "Password must be at least 8 characters long.";
+    }
+
+    // 3. Password and confirm password must match
+    if ($student_password !== $confirm_password) {
+        $errors[] = "Passwords do not match.";
+    }
+
+    // 4. Mobile number must contain only digits
+    if (!ctype_digit($mobile)) {
+        $errors[] = "Mobile number must contain only digits.";
+    }
+
+    // 5. Must select at least one hobby
+    if (empty($hobbies)) {
+        $errors[] = "You must select at least one hobby.";
+    }
+
+    // Check for errors
+    if (empty($errors)) {
+        // If no errors, display student data in tabular form
+        echo "<h2>Student Registration Successful</h2>";
+        echo "<table border='1'>
+                <tr><th>Field</th><th>Value</th></tr>
+                <tr><td>Student Name</td><td>" . htmlspecialchars($student_name) . "</td></tr>
+                <tr><td>Mobile No</td><td>" . htmlspecialchars($mobile) . "</td></tr>
+                <tr><td>Course</td><td>" . htmlspecialchars($course) . "</td></tr>
+                <tr><td>Hobbies</td><td>" . htmlspecialchars(implode(", ", $hobbies)) . "</td></tr>
+                <tr><td>Address</td><td>" . htmlspecialchars($address) . "</td></tr>
+                <tr><td>City</td><td>" . htmlspecialchars($city) . "</td></tr>
+              </table>";
+    } else {
+        // If there are errors, display them
+        echo "<h2>Errors</h2><ul>";
+        foreach ($errors as $error) {
+            echo "<li>" . htmlspecialchars($error) . "</li>";
+        }
+        echo "</ul>";
+        echo "<a href='Registration.php'>Go back to the form</a>";
+    }
+}
+?>
+Output:-
+
+
+
+2.Write a PHP dynamic script for login page with appropriate validations.
+
+
+
+	
+Register2.php
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Registration</title>
+</head>
+<body>
+   <h2>Registration Form</h2>
+<form action="register2_process.php" method="POST">
+<label for="username">Username:</label>
+<input type="text" id="username" name="username" required>
+<br><br>
+           <label for="password">Password:</label>
+<input type="password" id="password" name="password" required>
+<br><br>
+<label for="confirm_password">Confirm Password:</label>
+<input type="password" id="confirm_password" name="confirm_password" required>
+<br><br>
+<input type="submit" name="register" value="Register">
+</form>
+<?php
+if (isset($_GET['error'])) {
+echo '<p style="color:red;">' . $_GET['error'] . '</p>';
+}
+if (isset($_GET['success'])) {
+echo '<p style="color:green;">Registration successful! You can <a href="login.php">login</a> now.</p>';
+}
+?>
+</body>
+</html>
+
+
+Output:-
+
+
+	Register2_process.php
+<?php
+include('connection.php');
+// Check if form is submitted
+if (isset($_POST['register'])) {
+    $username = trim($_POST['username']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+    // Input validation
+    if (empty($username) || empty($password) || empty($confirm_password)) {
+        header("Location: register2.php?error=All fields are required");
+        exit();
+    }
+    if ($password !== $confirm_password) {
+        header("Location: registration.php?error=Passwords do not match");
+        exit();
+    }
+    // Check if username already exists
+    $stmt = $conn->prepare("SELECT id FROM users WHERE username = ?");
+    $stmt->bind_param("s", $username);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0) {
+        header("Location: register2.php?error=Username already taken");
+        exit();
+    }
+    // Hash the password
+    $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+    // Insert the new user into the database
+    $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
+    $stmt->bind_param("ss", $username, $hashed_password);
+    if ($stmt->execute()) {
+        // Registration success, redirect to login page
+        header("Location: login.php?success=Registration successful! Please log in.");
+        exit();
+    } else {
+        header("Location: register2.php?error=Registration failed. Please try again");
+        exit();
+    }
+}
+?>
+
+	Login.php
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login</title>
+</head>
+<body>
+     <center><h2>Login Form</h2></center>
+     <center><form action="login2_process.php" method="POST">
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required><br><br>
+     <label for="password">Password:</label>
+     <input type="password" id="password" name="password" required>
+<br><br>
+<input type="submit" name="login" value="Login">
+</form>
+</center>
+<!-- Display error or success messages -->
+<?php
+       if (isset($_GET['error'])) {
+        echo '<p style="color:red;">' . $_GET['error'] . '</p>';
+}
+    
+       if (isset($_GET['success'])) {
+        echo '<p style="color:green;">' . $_GET['success'] . '</p>';
+}
+?>
+    <p>Don't have an account? <a href="register2.php">Register here</a></p>
+</body>
+</html>
+
+Output:- 
+
+	Dashboard.php
+
+<?php
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['userid'])) {
+    header("Location: login.php");
+    exit();
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h1>Welcome, <?php echo $_SESSION['username']; ?>!</h1>
+    <p>This is your dashboard.</p>
+
+    <a href="logout.php">Logout</a>
+</body>
+</html>
+
+	Logout.php
+
+<?php
+session_start();
+session_unset();
+session_destroy();
+header("Location: login.php");
+exit();
+?>
+
+
+
+
+ 3.Write a PHP program to upload and download files using mysql connection.
+
+=> 
+table:- 
+
+CREATE TABLE  users (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(100),
+    size INT(11),
+    content LONGBLOB
+);
+
+upload.php
+
+<?php
+$servername = "localhost";
+$username   = "root";
+$password   = "";
+$dbname   = "pjs";
+// Create connection
+$conn = mysqli_connect($servername , $username  , $password , $dbname );
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+if (isset($_POST['submit'])) {
+    // File data
+    $fileName = $_FILES['file']['name'];
+    $fileTmpName = $_FILES['file']['tmp_name'];
+    $fileSize = $_FILES['file']['size'];
+    $fileType = $_FILES['file']['type'];
+    // Read the file content
+    $fileContent = addslashes(file_get_contents($fileTmpName));
+    // Insert file metadata and content into database
+    $sql = "INSERT INTO users (name, type, size, content) VALUES ('$fileName', '$fileType', '$fileSize', '$fileContent')";
+    if ($conn->query($sql) === TRUE) {
+        echo "File uploaded successfully!";
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+$conn->close();
+?>
+<!-- HTML form to upload file -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload</title>
+</head>
+<body>
+    <form action="upload.php" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit" name="submit">Upload</button>
+    </form>
+</body>
+</html>
+
+Output:-
+ 
+
+ 
+
+ 
+
+	Download.php
+
+<?php
+$servername = "localhost";
+$username   = "root";
+$password   = "";
+$dbname   = "pjs";
+
+
+
+// Create connection
+$conn = mysqli_connect($servername , $username  , $password , $dbname );
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+if (isset($_GET['file_id'])) {
+    $fileId = $_GET['file_id'];
+    // Fetch file data from database
+    $sql = "SELECT * FROM users WHERE id = $fileId";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        $file = $result->fetch_assoc();
+        $fileName = $file['name'];
+        $fileType = $file['type'];
+        $fileContent = $file['content'];
+        // Set headers to download file
+        header("Content-Disposition: attachment; filename=$fileName");
+        header("Content-Type: $fileType");
+        echo $fileContent;
+    } else {
+        echo "File not found!";
+    }
+}
+$conn->close();
+?>
+
+	List_file.php
+
+<?php
+$servername = "localhost";
+$username   = "root";
+$password   = "";
+$dbname   = "pjs";
+$conn = mysqli_connect($servername , $username  , $password , $dbname );
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+// Fetch files from database
+$sql = "SELECT * FROM users";
+$result = $conn->query($sql);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>List of Files</title>
+</head>
+<body>
+    <h1>Uploaded Files</h1>
+    <ul>
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo "<li><a href='download.php?file_id=" . $row['id'] . "'>" . $row['name'] . "</a></li>";
+            }
+        } else {
+            echo "<li>No files found!</li>";
+        }
+ ?>
+</ul>
+</body>
+</html>
+<?php
+$conn->close();
+?>
+output:-
+
+
+
+
+
+4.Create a simple shopping website using mysql connection. 
+    1.Product List 
+    2.Add to cart
+
+	Table
+
+-- Table for products
+CREATE TABLE products (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL(10, 2) NOT NULL,
+    description TEXT
+);
+
+-- Table for cart
+CREATE TABLE cart (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    product_id INT(11) NOT NULL,
+    quantity INT(11) NOT NULL DEFAULT 1,
+    FOREIGN KEY (product_id) REFERENCES products(id)
+);
+
+default  Insert product
+INSERT INTO products (name, price, description) VALUES ('Laptop', 999.99, 'A powerful laptop'), 
+                                                        ('Smartphone', 499.99, 'Latest smartphone with advanced features'), 
+							('Headphones', 29.99, 'Noise-canceling headphones'), 
+							('Smartwatch', 199.99, 'Smartwatch with fitness tracking features');
+
+
+
+	Index.php(display product list)
+
+<?php
+$servername = "localhost";
+$username   = "root";
+$password   = "";
+$dbname   = "shoping"; //databasename
+
+
+// Create connection
+$conn = mysqli_connect($servername , $username  , $password , $dbname );
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Fetch products from database
+$sql = "SELECT * FROM products";
+$result = $conn->query($sql);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product List</title>
+</head>
+<body>
+    <h1>Product List</h1>
+    <table border="1">
+        <tr>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+
+        <?php
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>" . $row['name'] . "</td>";
+                echo "<td>$" . $row['price'] . "</td>";
+                echo "<td>" . $row['description'] . "</td>";
+                echo "<td><a href='add_to_cart.php?id=" . $row['id'] . "'>Add to Cart</a></td>";
+                echo "</tr>";
+            }
+        } else {
+            echo "<tr><td colspan='4'>No products found!</td></tr>";
+        }
+        ?>
+    </table>
+
+    <p><a href="view_cart.php">View Cart</a></p>
+</body>
+</html>
+
+<?php
+$conn->close();
+?>
+Output:-
+ 
+
+	add_to_cart.php (Add to Cart Functionality)
+<?php
+$servername = "localhost";
+$username   = "root";
+$password   = "";
+$dbname   = "shoping";
+
+
+// Create connection
+$conn = mysqli_connect($servername , $username  , $password , $dbname );
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+if (isset($_GET['id'])) {
+    $product_id = $_GET['id'];
+
+    // Check if product is already in the cart
+    $sql = "SELECT * FROM cart WHERE product_id = $product_id";
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        // If product is already in the cart, increase the quantity
+        $sql = "UPDATE cart SET quantity = quantity + 1 WHERE product_id = $product_id";
+    } else {
+        // If product is not in the cart, insert it
+        $sql = "INSERT INTO cart (product_id, quantity) VALUES ($product_id, 1)";
+    }
+
+    if ($conn->query($sql) === TRUE) {
+        echo "Product added to cart!";
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+
+$conn->close();
+?>
+
+<p><a href="index.php">Continue Shopping</a></p>
+<p><a href="view_cart.php">View Cart</a></p>
+
+Output:-
+ 
+	view_cart.php(View Cart)
+<?php
+$host = "localhost";
+$dbname = "shoping";
+$username = "root";
+$password = "";
+$conn = new mysqli($host, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Fetch cart items with product details
+$sql = "SELECT cart.id, products.name, products.price, cart.quantity
+        FROM cart
+        INNER JOIN products ON cart.product_id = products.id";
+$result = $conn->query($sql);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart</title>
+</head>
+<body>
+    <h1>Your Cart</h1>
+    <table border="1">
+        <tr>
+            <th>Product Name</th>
+            <th>Price</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Action</th>
+        </tr>
+
+        <?php
+        $grand_total = 0;
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $total = $row['price'] * $row['quantity'];
+                $grand_total += $total;
+
+                echo "<tr>";
+                echo "<td>" . $row['name'] . "</td>";
+                echo "<td>$" . $row['price'] . "</td>";
+                echo "<td>" . $row['quantity'] . "</td>";
+                echo "<td>$" . $total . "</td>";
+                echo "<td><a href='remove_from_cart.php?id=" . $row['id'] . "'>Remove</a></td>";
+                echo "</tr>";
+            }
+        } else {
+            echo "<tr><td colspan='5'>Your cart is empty!</td></tr>";
+        }
+        ?>
+
+        <tr>
+            <td colspan="3" align="right"><strong>Grand Total:</strong></td>
+            <td><strong>$<?php echo $grand_total; ?></strong></td>
+            <td></td>
+        </tr>
+    </table>
+
+    <p><a href="index.php">Continue Shopping</a></p>
+</body>
+</html>
+
+<?php
+$conn->close();
+?>
+
+Output:-
+ 
+
+	remove_from_cart.php (Remove from Cart)
+<?php
+$host = "localhost";
+$dbname = "shoping";
+$username = "root";
+$password = "";
+// Create connection
+$conn = new mysqli($host, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+if (isset($_GET['id'])) {
+    $cart_id = $_GET['id'];
+    // Delete item from the cart
+    $sql = "DELETE FROM cart WHERE id = $cart_id";
+    if ($conn->query($sql) === TRUE) {
+        echo "Item removed from cart!";
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+$conn->close();
+?>
+<p><a href="view_cart.php">View Cart</a></p>
+<p><a href="index.php">Continue Shopping</a></p>
+
+Output:-
+
+
+
+
+
+
+
+
+
+ 5.Create an PHP script to maintain Employees Information.
+    tblEmp(EmpNo,EmpName,Salary,DeptName,DOJ) 
+    Design proper form and make necessary validations. 
+    Provide Insert,Update ,Delete and Show all records.
+
+
+	Table
+CREATE TABLE tblEmp (
+    EmpNo INT(11) AUTO_INCREMENT PRIMARY KEY,
+    EmpName VARCHAR(255) NOT NULL,
+    Salary DECIMAL(10, 2) NOT NULL,
+    DeptName VARCHAR(255) NOT NULL,
+    DOJ DATE NOT NULL
+);
+
+
+	Indexemp.php
+
+<?php
+$host = "localhost";
+$dbname = "emp";//database name
+$username = "root";
+$password = "";
+
+// Create connection
+$conn = new mysqli($host, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+// Initialize variables
+$EmpNo = $EmpName = $Salary = $DeptName = $DOJ = "";
+$update = false;
+// Insert or Update employee data
+if (isset($_POST['submit'])) {
+    $EmpName = $_POST['EmpName'];
+    $Salary = $_POST['Salary'];
+    $DeptName = $_POST['DeptName'];
+    $DOJ = $_POST['DOJ'];
+
+    if (isset($_POST['EmpNo']) && !empty($_POST['EmpNo'])) {
+        // Update record
+        $EmpNo = $_POST['EmpNo'];
+        $sql = "UPDATE tblEmp SET EmpName='$EmpName', Salary='$Salary', DeptName='$DeptName', DOJ='$DOJ' WHERE EmpNo=$EmpNo";
+    } else {
+        // Insert new record
+        $sql = "INSERT INTO tblEmp (EmpName, Salary, DeptName, DOJ) VALUES ('$EmpName', '$Salary', '$DeptName', '$DOJ')";
+    }
+    if ($conn->query($sql) === TRUE) {
+        echo "Record saved successfully!";
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }  }
+// Fetch record to edit
+if (isset($_GET['edit'])) {
+    $EmpNo = $_GET['edit'];
+    $result = $conn->query("SELECT * FROM tblEmp WHERE EmpNo=$EmpNo");
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $EmpName = $row['EmpName'];
+        $Salary = $row['Salary'];
+        $DeptName = $row['DeptName'];
+        $DOJ = $row['DOJ'];
+        $update = true;
+    }   
+}
+// Delete employee
+if (isset($_GET['delete'])) {
+    $EmpNo = $_GET['delete'];
+    $conn->query("DELETE FROM tblEmp WHERE EmpNo=$EmpNo");
+    echo "Record deleted successfully!";
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Management</title>
+</head>
+<body>
+    <h1>Employee Information</h1>
+    <!-- Employee Form -->
+    <form action="indexemp.php" method="POST">
+    <input type="hidden" name="EmpNo" value="<?php echo $EmpNo; ?>">
+        <div>
+            <label for="EmpName">Employee Name:</label>
+            <input type="text" name="EmpName" value="<?php echo $EmpName; ?>" required>
+        </div>
+        <div>
+            <label for="Salary">Salary:</label>
+            <input type="number" name="Salary" value="<?php echo $Salary; ?>" required>   
+</div>
+        <div>
+            <label for="DeptName">Department Name:</label>
+            <input type="text" name="DeptName" value="<?php echo $DeptName; ?>" required>
+        </div>
+        <div>
+            <label for="DOJ">Date of Joining (DOJ):</label>
+            <input type="date" name="DOJ" value="<?php echo $DOJ; ?>" required>
+        </div>
+        <div>
+            <button type="submit" name="submit"><?php echo $update ? 'Update' : 'Add'; ?> Employee</button> </div>
+    </form>
+    <!-- Employee List -->
+    <h2>All Employees</h2>
+    <table border="1">
+        <tr>
+            <th>Employee No</th>
+            <th>Employee Name</th>
+            <th>Salary</th>
+            <th>Department</th>
+            <th>Date of Joining</th>
+            <th>Action</th>
+        </tr>
+        <?php
+        $result = $conn->query("SELECT * FROM tblEmp");
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>" . $row['EmpNo'] . "</td>";
+                echo "<td>" . $row['EmpName'] . "</td>";
+                echo "<td>" . $row['Salary'] . "</td>";
+                echo "<td>" . $row['DeptName'] . "</td>";
+                echo "<td>" . $row['DOJ'] . "</td>";
+                echo "<td><a href='indexemp.php?edit=" . $row['EmpNo'] . "'>Edit</a> | <a href='indexemp.php?delete=" . $row['EmpNo'] . "' onclick='return confirm(\"Are you sure?\")'>Delete</a></td>";
+                echo "</tr>"; }
+        } else {
+            echo "<tr><td colspan='6'>No records found!</td></tr>";
+        }
+        ?>
+    </table>
+</body>
+</html>
+<?php
+$conn->close();
+?>
+	Output:-
+
+Add employee
+ 
+
+
+Update employee
+
+
+
+ 
+
+
+
+Delete employee
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 6. Create an application which maintain information of cricketers.
+      playerInfo(id,Name,Contry,No_Of_Mathes,No_Of_Runs) 
+     Design proper form and make necessary validation. 
+     Perform Insert , Update and Delete Operations. 
+    -Display contry wise player information.
+
+
+=> table
+CREATE TABLE playerInfo (
+    id INT(11) AUTO_INCREMENT PRIMARY KEY,
+    Name VARCHAR(255) NOT NULL,
+    Country VARCHAR(100) NOT NULL,
+    No_Of_Matches INT(11) NOT NULL,
+    No_Of_Runs INT(11) NOT NULL
+);
+
+	Indexcricket.php
+
+<?php
+$host = "localhost";
+$dbname = "cricket";
+$username = "root";
+$password = "";
+// Create connection
+$conn = new mysqli($host, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+// Initialize variables
+$id = $name = $country = $no_of_matches = $no_of_runs = "";
+$update = false;
+// Insert or Update cricketer data
+if (isset($_POST['submit'])) {
+    $name = $_POST['Name'];
+    $country = $_POST['Country'];
+    $no_of_matches = $_POST['No_Of_Matches'];
+    $no_of_runs = $_POST['No_Of_Runs'];
+    // Input validation
+    if (!empty($name) && !empty($country) && !empty($no_of_matches) && !empty($no_of_runs)) {
+        if (isset($_POST['id']) && !empty($_POST['id'])) {
+            // Update record
+            $id = $_POST['id'];
+            $sql = "UPDATE playerInfo SET Name='$name', Country='$country', No_Of_Matches='$no_of_matches', No_Of_Runs='$no_of_runs' WHERE id=$id";
+        } else {
+            // Insert new record
+            $sql = "INSERT INTO playerInfo (Name, Country, No_Of_Matches, No_Of_Runs) VALUES ('$name', '$country', '$no_of_matches', '$no_of_runs')";
+        }
+        if ($conn->query($sql) === TRUE) {
+            echo "Record saved successfully!";
+        } else {
+            echo "Error: " . $sql . "<br>" . $conn->error;
+        }
+    } else {
+        echo "All fields are required!";
+    }
+}
+// Fetch record to edit
+if (isset($_GET['edit'])) {
+    $id = $_GET['edit'];
+    $result = $conn->query("SELECT * FROM playerInfo WHERE id=$id");
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $name = $row['Name'];
+        $country = $row['Country'];
+        $no_of_matches = $row['No_Of_Matches'];
+        $no_of_runs = $row['No_Of_Runs'];
+        $update = true;
+    }
+}
+// Delete player
+if (isset($_GET['delete'])) {
+    $id = $_GET['delete'];
+    $conn->query("DELETE FROM playerInfo WHERE id=$id");
+    echo "Record deleted successfully!";
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cricketer Information Management</title>
+</head>
+<body>
+    <h1>Cricketer Information</h1>
+    <!-- Cricketer Form -->
+    <form action="indexcricket.php" method="POST">
+        <input type="hidden" name="id" value="<?php echo $id; ?>">
+        <div>
+            <label for="Name">Player Name:</label>
+            <input type="text" name="Name" value="<?php echo $name; ?>" required>
+        </div>
+        <div>
+            <label for="Country">Country:</label>
+            <input type="text" name="Country" value="<?php echo $country; ?>" required>
+        </div>
+        <div>
+            <label for="No_Of_Matches">No of Matches:</label>
+            <input type="number" name="No_Of_Matches" value="<?php echo $no_of_matches; ?>" required>  </div>
+        <div>
+            <label for="No_Of_Runs">No of Runs:</label>
+            <input type="number" name="No_Of_Runs" value="<?php echo $no_of_runs; ?>" required> </div>
+        <div>
+            <button type="submit" name="submit"><?php echo $update ? 'Update' : 'Add'; ?> Cricketer</button>
+        </div>
+    </form>
+    <!-- Player List by Country -->
+    <h2>Player Information by Country</h2>
+    <?php
+    // Fetch players grouped by country
+    $result = $conn->query("SELECT Country, GROUP_CONCAT(Name SEPARATOR ', ') AS Players FROM playerInfo GROUP BY Country");
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            echo "<h3>Country: " . $row['Country'] . "</h3>";
+            echo "<p>Players: " . $row['Players'] . "</p>";
+        }
+    } else {
+        echo "<p>No players found!</p>";
+    }
+    ?>
+    <!-- Player List with Edit/Delete Options -->
+    <h2>All Players</h2>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Country</th>
+            <th>No of Matches</th>
+            <th>No of Runs</th>
+            <th>Action</th>
+        </tr>
+        <?php
+        $result = $conn->query("SELECT * FROM playerInfo");
+        if ($result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                echo "<tr>";
+                echo "<td>" . $row['id'] . "</td>";
+                echo "<td>" . $row['Name'] . "</td>";
+                echo "<td>" . $row['Country'] . "</td>";
+                echo "<td>" . $row['No_Of_Matches'] . "</td>";
+                echo "<td>" . $row['No_Of_Runs'] . "</td>";
+                echo "<td><a href='indexcricket.php?edit=" . $row['id'] . "'>Edit</a> | <a href='indexcricket.php?delete=" . $row['id'] . "' onclick='return confirm(\"Are you sure?\")'>Delete</a></td>";
+                echo "</tr>";   }
+        } else {
+            echo "<tr><td colspan='6'>No records found!</td></tr>";
+        }
+        ?>
+    </table>
+</body>
+</html>
+
+<?php
+$conn->close();
+?>
+
+	Output:-
+add player
+
+
+Update player
+
+
+
+Delete player
+ 
+
+
+
+
+7.Write a PHP script to perform live search using mysql.
+=> 
+
+
+Connection.php
+<?php 
+$servername = "localhost";
+$username   = "root";
+$password   = "";
+$dbname   = "demo";
+$conn = mysqli_connect($servername , $username  , $password , $dbname );
+if($conn)
+{
+	echo "connection ok";	
+}
+else{
+    die("connection fail because".mysqli_connect_error());
+}
+?>
+
+
+	Ins.php
+
+<!DOCTYPE html>
+<?php
+	include("connection.php");
+?>
+//data display and search
+<html>
+	<head>
+			<title>form</title>
+			 
+</head>  
+<body>
+<table>
+<form action="" method="post" >
+<tr>
+<td>name:</td>
+<td><input type="text" name="name" required></td>
+</tr>
+<tr>
+<td>city:</td>
+<td><input type="text" name="city"></td>
+</tr>
+<tr>
+<td>address:</td>
+<td><input type="text" name="address"></td>
+</tr>
+<tr>
+td></td>
+<td><input type="submit" name="submit" value="submit" ></td>
+</tr>			
+</form>
+<form action="" method="post">
+            <tr>
+	<td><input type="submit" name="search" value="Search"></td>
+            <td><input type="text" name="search_name" placeholder="Search by name"></td>  </tr>
+        </form>
+		</table>	
+<?php
+   if (isset($_POST['submit'])) {
+    $name = $_POST['name'];
+	$city = $_POST['city'];
+	$address = $_POST['address'];	
+    $query = "insert into user values('','$name','$city','$address')";
+    $data = mysqli_query($conn , $query); 
+   if($data){
+	   echo "inserted ";  }
+}
+    $searchResult = [];
+    if (isset($_POST['search'])) {
+    $searchName = $_POST['search_name'];
+    $searchQuery = "SELECT * FROM user WHERE name LIKE '%$searchName%'";
+    $searchResult = mysqli_query($conn, $searchQuery);  }
+	 if (!empty($searchResult) && mysqli_num_rows($searchResult) > 0) {
+        echo "<h2>Search Results:$searchName</h2>";
+        echo "<table border='1'>
+                <tr>
+                    <th>Name</th>
+                    <th>City</th>
+                    <th>Address</th>
+                </tr>";
+        while ($row = mysqli_fetch_assoc($searchResult)) {
+            echo "<tr>
+                    <td>{$row['name']}</td>
+                    <td>{$row['city']}</td>
+                    <td>{$row['address']}</td>
+                </tr>";
+        }
+        echo "</table>";
+    } elseif (isset($_POST['search'])) {
+        echo "No results found.$searchName";
+    }
+ ?>
+	</body>
+</html>
+
+	OUTPUT:-
+Record insert
+
+
+
+Display record
+ 
+
+Search record
+ 
+
+8.Write a flask code to print multiplication table of a number input by a user.
+=> 
+flask code
+
+from flask import Flask, render_template, request
+app = Flask(__name__)
+@app.route('/', methods=['GET', 'POST']) 
+def multiplication_table():
+    result = None
+    number = None
+    if request.method == 'POST':
+        # Get the number from the form input
+        number = int(request.form['number'])
+        # Generate the multiplication table from 1 to 10
+        result = {i: i * number for i in range(1, 11)}
+    return render_template('index.html', number=number, result=result)
+if __name__ == '__main__':
+    app.run(debug=True)
+	Run the flask app:-  python app.py	
+
+	Index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplication Table</title>
+</head>
+<body>
+ <center><h1>Multiplication Table Generator</h1></center>
+    <!-- Form to input a number -->
+    <form method="POST">
+        <label for="number">Enter a number:</label>
+        <input type="number" id="number" name="number" required>
+     <button type="submit" style="text-align:center;" Generate Table</button>
+    </form>
+    <!-- Display the multiplication table if generated -->
+    {% if result %}
+        <center><h2>Multiplication Table of {{ number }}:</h2></center>
+        <ul> 
+{% for i, product in result.items() %}
+                <li>{{ i }} x {{ number }} = {{ product }}</li>
+            {% endfor %}
+ </ul>
+    {% endif %}
+</body>
+</html>
+
+
+
+Output:-
+
+
+
+
+9.Write a flask code to create login page. 
+=>
+Flask code (app.py)
+
+from flask import Flask, render_template, request, redirect, url_for, flash
+app = Flask(__name__)
+app.secret_key = 'your_secret_key'  # Required for session and flash messages
+# Hardcoded credentials (for example purposes)
+USERNAME = "admin"
+PASSWORD = "password123"
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        
+        # Check if credentials match the hardcoded ones
+        if username == USERNAME and password == PASSWORD:
+            flash('Login successful!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            flash('Invalid username or password', 'error')
+    return render_template('login.html')
+@app.route('/dashboard')
+def dashboard():
+    return "<h1>Welcome to the Dashboard!</h1>"
+if __name__ == '__main__':
+    app.run(debug=True)
+
+	Login.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login form</title>
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        
+        <!-- Displaying Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="message">
+                    {% for category, message in messages %}
+                        <p class="{{ category }}">{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
+
+Dashboard Route:-
+
+@app.route('/dashboard')
+def dashboard():
+    return "<h1>Welcome to the Dashboard!</h1>"
+
+Output:- 
+ 
+
+Dashboard Page (Success Message):-
+
+Welcome to the Dashboard!
+

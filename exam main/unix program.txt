@@ -1,0 +1,691 @@
+=> simple program
+
+# Prompt and read the user's name
+echo -n "Enter a name: "
+read name
+
+# Prompt and read the user's division
+echo -n "Enter a div: "
+read div
+
+# Prompt and read the user's department
+echo -n "Enter a  dept: "
+read dept
+
+# Output the information
+echo "Entered name: "$name
+echo "Entered div: "$div
+echo "Entered dept: "$dept
+
+
+
+
+
+                      Byte Computers
+
+1.To count files start with m
+find . -name “m*” -print 0 | wc -l
+
+2.To count lines of files start with m
+find . -name “m*” -exec cat {} + | wc -l
+
+3.To remove leading spaces from each lines of a file
+Sed ‘s/^[ \t]*//g’ f1
+
+4.To display line numbers for each lines of a file
+Sed “=” f1
+
+5.To display lines 10 to 20 from file
+Sed -n ’10,20p’ f1
+
+6.To remove folder f1/f2/f3
+rm -R f1
+
+7.To move all files that begins with digit from parent dir to current dir
+find .. -name “[0-9]*” -exec mv {} ./* \
+
+8.To display file names begins with digits
+find . -type f -exec grep -l "^[0-9]" {} \;
+
+9.To convert 192 to Hexadecimal
+echo "obase=16; 192" | bc
+
+
+
+
+1.Input numbers from command lines args and print them in reverse.
+
+If [ $# -eq 0 ]
+then
+Echo “Specify Arguments”
+else
+n=$#
+while [ $n -ge 1 ]
+do
+Echo $n
+n=`expr $n – 1`
+done
+fi
+
+2.Print total no. of files and dir of current dir
+cf=`ls -l | grep -c “^-`
+cd=`ls -l | grep -c “^d`
+echo Total Files : $cf
+echo Total Dirs : $cd
+
+3.To check given word is palindrome
+=>
+echo “Enter String “
+read w
+l=`expr length $w`
+r=””
+while [ $l -ge 1 ]
+do
+ch=`echo $w | cut -c$l`
+r=$r$ch
+l=`expr $l - 1`
+done
+if [ $w = $r ] ; then
+echo $w
+fi
+
+=>To print all palindrome words from file
+for w in `cat $1`
+do
+l=`expr length $w`
+r=””
+while [ $l -ge 1 ]
+do
+ch=`echo $w | cut -c$l`
+r=$r$ch
+l=`expr $l - 1`
+done
+if [ $w = $r ] ; then
+echo $w
+fi
+done
+
+=>To check two strings are equals or not
+echo Enter string 1
+read s1
+echo Enter string 2
+read s2
+if [ $s1 = $s2 ]
+then
+echo Equals
+else
+echo Not Equals
+fi
+
+=> To find factorial of n
+
+echo enter any no
+read n
+f=1
+i=1
+while [ $i -le $n ]
+do
+f=`expr $i \* $f`
+i=`expr $i + 1`
+done
+echo THE FACTORIAL OF $n IS $f
+
+Example: To find sum of all digits
+echo Enter no
+read n
+s=0
+while [ $n -gt 0 ]
+do
+r=`expr $n % 10`
+n=`expr $n / 10`
+s=`expr $s + $r`
+done
+echo "The sum of all digits is $s"
+
+
+8. To print Fibonacci series
+echo Enter number
+read n
+a=0
+b=1
+i=1
+while [ $i -le $n ]
+do
+echo $a "\c"
+c=`expr $a + $b`
+a=$b
+b=$c
+i=`expr $i + 1`
+done
+echo
+echo
+or
+echo "Enter no :\c"
+read n
+a=0
+b=1
+for((i=1;i<=$n;i++))
+do
+echo $a
+c=`expr $a + $b`
+a=$b
+b=$c
+done
+
+=>Calculator using command line arguments
+
+case $2 in
+"+") c=`expr $1 + $3`
+echo "The sum is $c"
+;;
+"-") c=`expr $1 - $3`
+echo "The sub is $c"
+;;
+"/") c=`expr $1 / $3`
+
+echo "The div is $c"
+;;
+*) c=`expr $1 \* $3`
+echo "The mul is $c"
+esac
+Run : sh a1 10 + 20
+
+=>To count total lines , words ,chars of a file given as command line argument.
+cl=0
+cw=0
+cc=0
+exec < $1
+while read line
+do
+cl=`expr $cl + 1`
+for w in $line
+do
+cw=`expr $cw + 1`
+l=`expr length $w`
+done
+done
+echo “Total Lines : $cl”
+echo “Total words : $cw”
+echo “Total chars : $cc”
+
+
+=> To Display string in uppercase, lowercase and toggle case
+echo Enter string
+read s
+echo UPPERCASE
+echo $s | tr "[a-z]" "[A-Z]"
+echo lowercase
+echo $s | tr "[A-Z]" "[a-z]"
+echo TogGleCase
+echo $s | tr "[A-Za-z]" "[a-zA-Z]"
+
+
+=>To check given integer is valid or not
+echo Enter Integer No
+read n
+k=`echo $n | egrep "^[+-]?[1-9][0-9]*$"`
+if [ $? -eq 0 ] ; then
+echo Valid
+else
+echo Invalid
+fi
+
+=>To find total occurance of given word in given string
+echo "Enter string :\c"
+read s
+echo "Enter word :\c"
+read w
+c=0
+for i in $s
+do
+if [ $i = $w ] ; then
+c=`expr $c + 1`
+fi
+done
+echo "Total occurance : $c"
+
+=>To find total occurance of single char from given string
+echo "Enter string :\c"
+read s
+echo "Enter single char :\c"
+read c
+cnt=0
+l=`expr length $s`
+for((i=1;i<=$l;i++))
+do
+k=`echo $s | cut -c$i`
+if [ $c = $k ] ; then
+cnt=`expr $cnt + 1`
+fi
+done
+echo "Total occurance : $cnt"
+
+
+=> To display even number of fields for each record
+{
+for (i=2;i<=NF;i+=2)
+printf “%20s “,$i
+printf “\n”
+}
+
+=>To display fields in reverse order
+{
+for (i=NF;i>=1 ;i--)
+printf “%-15s”,$i
+printf “\n”
+}
+
+=>To print file contents in reverse
+{
+a[c++]=$0
+}
+END {
+for (i=c-1;i>=0;i--)
+printf "%s\n",a[i]
+}
+
+=>Write awk scrip to count total chars , words and lines from file
+{ l=length($0)
+tl=tl+l
+tw=tw+NF
+}
+END {
+printf "Total chars : %d\n",tl
+printf "Total words : %d\n",tw
+printf "Total Lines : %d\n",NR
+}
+
+
+=>Write an awk script that count frequency of one , two, three , four and more than four characters word in a file.
+{
+for (i=1;i<=NF;i++)
+{
+if ( length($i)==1)
+c1++
+else if(length($i)==2)
+c2++
+else if(length($i)==3)
+c3++
+else if(length($i)==4)
+c4++
+else
+c5++
+}
+}
+END {
+printf "1 char words : %d\n",c1
+printf "2 char words : %d\n",c2
+printf "3 char words : %d\n",c3
+printf "4 char words : %d\n",c4
+printf "5 or more char words : %d",c5
+}
+
+=>Replace all occurances of “linux” with “unix” in file f1.
+A1.awk
+{
+for(i=1;i<=NF;i++)
+{
+if ( $i == "linux" )
+printf "Unix "
+else
+printf "%s ",$i
+}
+printf "\n"
+}
+awk –f a1.awk test
+
+
+
+=> write a shell script to perform following using a file having employee(id, name, post , dept,salary)   
+1.insert five record 
+2.update record 
+3.search particular recordbased on id 
+4.delete particular record based on id
+
+
+=>Example of employees.txt (Before):
+
+  save :-employees.txt
+
+  1,John Doe,Manager,HR,50000
+2,Jane Smith,Engineer,IT,45000
+3,Bob Johnson,Analyst,Finance,40000
+4,Emily Davis,Clerk,Admin,35000
+5,Michael Brown,Technician,Support,30000
+
+
+
+=> main file Shell Script (employee_management.sh):
+
+#!/bin/bash
+
+FILE="employees.txt"
+
+# Function to insert 5 employee records
+insert_records() {
+  echo "Inserting 5 employee records:"
+  for i in {1..5}; do
+    echo "Enter Employee $i details:"
+    read -p "ID: " id
+    read -p "Name: " name
+    read -p "Post: " post
+    read -p "Department: " dept
+    read -p "Salary: " salary
+    echo "$id,$name,$post,$dept,$salary" >> $FILE
+  done
+  echo "Records inserted successfully."
+}
+
+# Function to update an employee record by ID
+update_record() {
+  read -p "Enter Employee ID to update: " id
+  if grep -q "^$id," $FILE; then
+    grep -v "^$id," $FILE > temp && mv temp $FILE
+    echo "Enter updated details for Employee ID $id:"
+    read -p "Name: " name
+    read -p "Post: " post
+    read -p "Department: " dept
+    read -p "Salary: " salary
+    echo "$id,$name,$post,$dept,$salary" >> $FILE
+    echo "Record updated successfully."
+  else
+    echo "Employee with ID $id not found."
+  fi
+}
+
+# Function to search for an employee record by ID
+search_record() {
+  read -p "Enter Employee ID to search: " id
+  if grep -q "^$id," $FILE; then
+    echo "Employee found:"
+    grep "^$id," $FILE
+  else
+    echo "Employee with ID $id not found."
+  fi
+}
+
+# Function to delete an employee record by ID
+delete_record() {
+  read -p "Enter Employee ID to delete: " id
+  if grep -q "^$id," $FILE; then
+    grep -v "^$id," $FILE > temp && mv temp $FILE
+    echo "Employee with ID $id deleted successfully."
+  else
+    echo "Employee with ID $id not found."
+  fi
+}
+
+# Menu to select operations
+while true; do
+  echo "Employee Management System"
+  echo "1. Insert 5 Employee Records"
+  echo "2. Update an Employee Record"
+  echo "3. Search an Employee Record by ID"
+  echo "4. Delete an Employee Record by ID"
+  echo "5. Exit"
+  read -p "Choose an option: " option
+
+  case $option in
+    1) insert_records ;;
+    2) update_record ;;
+    3) search_record ;;
+    4) delete_record ;;
+    5) exit 0 ;;
+    *) echo "Invalid option. Please choose a valid operation." ;;
+  esac
+done
+
+run:-
+
+1. chmod +x employee_management.sh
+
+2  ./employee_management.sh
+
+
+3.  r ni error aave to 
+sed -i 's/\r$//' employee_management.sh
+
+4   ./employee_management.sh
+
+
+
+=> write a shell script to which take user input of roll no, name ,marks of five subjects.    find the total and percentage and display the result pass if percentage are >=35 and fail if percentage are <35.
+
+
+
+Shell Script (student_result.sh):
+
+#!/bin/bash
+
+# Function to check if marks are valid (0 to 100)
+is_valid_marks() {
+  if [ "$1" -ge 0 ] && [ "$1" -le 100 ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Read input from the user
+read -p "Enter Roll Number: " roll_no
+read -p "Enter Name: " name
+
+# Input marks for 5 subjects and validate
+echo "Enter marks for 5 subjects (0-100):"
+
+total=0
+for i in {1..5}; do
+  while true; do
+    read -p "Subject $i Marks: " marks
+    if is_valid_marks "$marks"; then
+      total=$((total + marks))
+      break
+    else
+      echo "Invalid marks. Please enter a value between 0 and 100."
+    fi
+  done
+done
+
+# Calculate percentage
+percentage=$((total / 5))
+
+# Display total, percentage, and result
+echo "-------------------------------------"
+echo "Roll Number: $roll_no"
+echo "Name: $name"
+echo "Total Marks: $total"
+echo "Percentage: $percentage%"
+
+# Check pass or fail condition
+if [ "$percentage" -ge 35 ]; then
+  echo "Result: Pass"
+else
+  echo "Result: Fail"
+fi
+echo "-------------------------------------"
+
+
+
+run:- chmod +x student_result.sh
+
+   ./student_result.sh
+
+
+
+chat
+1.
+=> Script to Find Prime Number:
+
+#!/bin/bash
+read -p "Enter a number: " num
+is_prime=1
+for ((i=2; i<=num/2; i++)); do
+    if ((num % i == 0)); then
+        is_prime=0
+        break
+    fi
+done
+if ((is_prime == 1)); then
+    echo "$num is a prime number."
+else
+    echo "$num is not a prime number."
+fi
+
+2.
+=> Script to List All Files in a Directory Modified in the Last 7 Days:
+#!/bin/bash
+find . -type f -mtime -7
+
+
+3.
+=>Script to Display CPU and Memory Usage:
+#!/bin/bash
+echo "CPU Usage:"
+top -b -n1 | grep "Cpu(s)"
+echo "Memory Usage:"
+free -h
+
+4.
+=>Script to Search for a Word in a File.
+
+#!/bin/bash
+read -p "Enter the word to search: " word
+read -p "Enter the filename: " file
+grep -n "$word" "$file"
+
+5.
+=>Script to Find the Sum of Digits of a Number.
+#!/bin/bash
+read -p "Enter a number: " num
+sum=0
+while [ $num -gt 0 ]; do
+    digit=$((num % 10))
+    sum=$((sum + digit))
+    num=$((num / 10))
+done
+echo "Sum of digits: $sum"
+
+
+
+
+6.arithmetic operation
+
+=> 
+#!/bin/bash
+
+# Function to perform addition
+add() {
+  echo "Result: $(( $1 + $2 ))"
+}
+
+# Function to perform subtraction
+subtract() {
+  echo "Result: $(( $1 - $2 ))"
+}
+
+# Function to perform multiplication
+multiply() {
+  echo "Result: $(( $1 * $2 ))"
+}
+
+# Function to perform division
+divide() {
+  if [ $2 -ne 0 ]; then
+    echo "Result: $(( $1 / $2 ))"
+  else
+    echo "Error: Division by zero is not allowed."
+  fi
+}
+
+# Display menu for user
+echo "Select operation:"
+echo "1. Addition"
+echo "2. Subtraction"
+echo "3. Multiplication"
+echo "4. Division"
+read -p "Enter your choice (1-4): " choice
+
+# Read two numbers from the user
+read -p "Enter first number: " num1
+read -p "Enter second number: " num2
+
+# Perform the chosen operation
+case $choice in
+  1)
+    add $num1 $num2
+    ;;
+  2)
+    subtract $num1 $num2
+    ;;
+  3)
+    multiply $num1 $num2
+    ;;
+  4)
+    divide $num1 $num2
+    ;;
+  *)
+    echo "Invalid choice. Please select a number between 1 and 4."
+    ;;
+esac
+
+
+run:- chmod +x arithmetic_operations.sh
+      ./arithmetic_operations.sh
+
+
+     r ni error to aa command :-  sed -i 's/\r$//' arithmetic_operations.sh
+ 
+    sh arithmetic_operations.sh
+
+
+
+=> equal program
+
+clear
+a=10
+b=20
+
+if [ $a == $b ]
+then
+   echo "a is equal to b"
+elif [ $a -gt $b ]
+then
+   echo "a is greater than b"
+elif [ $a -lt $b ]
+then
+   echo "a is less than b"
+else
+   echo "None of the condition met"
+fi
+
+=> #program to check whether the two number are equal or not
+
+clear
+a=10
+b=20
+
+if [ $a == $b ]
+then
+	echo "a equal to b"
+fi
+
+if [ $a != $b ]
+then
+	echo "a is not equal to b"
+fi
+
+=> sum program
+
+clear
+echo -n "Enter 1st number: "
+read f_no
+echo -n "Enter 2nd number: "
+read s_no
+
+mul=`expr $f_no \* $s_no` 
+sum=$((f_no+s_no))
+sum1=`expr $f_no + $s_no`
+
+echo "Sum of $f_no and $s_no: "$sum
+echo "Sum of $f_no and $s_no: "$sum1
+echo "multiplication of $f_no and $s_no: "$mul

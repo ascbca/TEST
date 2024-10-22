@@ -1,0 +1,440 @@
+=> simplecon.php
+
+
+<?php
+
+ $servername = "localhost";
+ $username = "root";
+ $password = "";
+ $dbname = "simple";
+ 
+ 
+ $conn = mysqli_connect($servername,$username,$password,$dbname);
+ if($conn){
+	 echo"ok";
+ }
+ else{
+	 echo"not ok";
+ }
+
+
+?>
+
+
+=> simple_add.php
+
+
+<!DOCTYPE html>
+<?php
+    include("simplecon.php");
+	
+?>
+<html>
+<head>
+<title>library management</title>
+</head>
+<body>
+<form action="" method="post">
+<table border="1" >
+
+    <tr>
+		<td>id:</td>
+		<td><input type="number" name="id"></td>
+	</tr>
+	<tr>
+		<td>title:</td>
+		<td><input type="text" name="title" ></td>
+	</tr>
+	<tr>
+		<td>author:</td>
+		<td><input type="text" name="author"></td>
+	</tr>
+	<tr>
+		<td>price:</td>
+		<td><input type="number" name="price" ></td>
+	</tr>
+	<tr>
+		<td>copy:</td>
+		<td><input type="number" name="copy"></td>
+	</tr>
+	<tr>
+		 <td colspan="2">
+			<input type="submit" name="insert" value="insert">
+			<input type="submit" name="update" value="update">
+			<input type="submit" name="delete" value="delete">
+		</td>
+		
+		
+	</tr>
+
+</table>
+</form>
+
+<!-- Form for Search -->
+<h2>Search Books</h2>
+<form action="" method="post">
+    <label for="searchTerm">Search by Title, Author, or Price:</label>
+    <input type="text" name="searchTerm" placeholder="Enter title, author, or price">
+    <input type="submit" name="search" value="Search">
+</form>
+
+<?php
+   //insert code 
+  if(isset($_POST['insert'])){
+	  
+	  $title= $_POST['title'];
+	  $author= $_POST['author'];
+	  $price= $_POST['price'];
+	  $copy= $_POST['copy'];
+	  
+	  $query= "insert into book values('','$title','$author','$price','$copy')";
+	  $data= mysqli_query($conn , $query);
+	  
+	  if($data){
+		  echo"inserted";
+	  }
+	  else{
+		  echo"not";
+	  }
+  }
+      //update record
+	  if(isset($_POST['update'])){
+		  
+	  $id= $_POST['id'];
+	  $title= $_POST['title'];
+	  $author= $_POST['author'];
+	  $price= $_POST['price'];
+	  $copy= $_POST['copy'];
+	  
+	  $query = "UPDATE book SET title='$title', author='$author', price='$price', copy='$copy' WHERE id='$id'";
+      $data = mysqli_query($conn, $query);
+	  
+	  
+	  if($data){
+		  echo"updated";
+	  }
+	  else{
+		  echo"not update";
+	  }
+	  
+	 }
+	    //delete record 
+	  if(isset($_POST['delete'])){
+		  
+	  $id= $_POST['id'];
+	 
+	  
+	  $query = "delete from book WHERE id='$id'";
+      $data = mysqli_query($conn, $query);
+	  
+	  if($data){
+		  echo"deleted";
+	  }
+	  else{
+		  echo"not deleted";
+	  }
+	    	  
+  }
+  
+  // Search for books
+if(isset($_POST['search'])){
+    $searchTerm = $_POST['searchTerm'];
+    
+    $query = "SELECT * FROM book WHERE title LIKE '%$searchTerm%' OR author LIKE '%$searchTerm%' OR price LIKE '%$searchTerm%'";
+    $result = mysqli_query($conn, $query);
+
+    echo "<h2>Search Results</h2>";
+    echo "<table border='1'>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Price</th>
+        <th>Copies</th>
+    </tr>";
+
+    while($row = mysqli_fetch_assoc($result)){
+        echo "<tr>";
+        echo "<td>" . $row['id'] . "</td>";
+        echo "<td>" . $row['title'] . "</td>";
+        echo "<td>" . $row['author'] . "</td>";
+        echo "<td>" . $row['price'] . "</td>";
+        echo "<td>" . $row['copy'] . "</td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+}
+
+
+
+  // View all books
+echo "<h2>View All Books</h2>";
+echo "<table border='1'>
+<tr>
+    <th>ID</th>
+    <th>Title</th>
+    <th>Author</th>
+    <th>Price</th>
+    <th>Copies</th>
+</tr>";
+
+$query = "SELECT * FROM book";
+$result = mysqli_query($conn, $query);
+
+// Loop through the result set and display data in table rows
+while($row = mysqli_fetch_assoc($result)){
+    echo "<tr>";
+    echo "<td>" . $row['id'] . "</td>";
+    echo "<td>" . $row['title'] . "</td>";
+    echo "<td>" . $row['author'] . "</td>";
+    echo "<td>" . $row['price'] . "</td>";
+    echo "<td>" . $row['copy'] . "</td>";
+    echo "</tr>";
+}
+
+echo "</table>";
+
+
+
+?>
+
+
+</body>
+</html>
+
+
+
+aa alag thi chhe validation karvu hoy to
+
+=>simple_validate.php
+
+<?php
+function validate($title, $author, $price, $copy) {
+    $errors = [];
+
+    if (empty($title)) {
+        $errors[] = "Title is required.";
+    }
+
+    if (empty($author)) {
+        $errors[] = "Author is required.";
+    }
+
+    if (empty($price) || !is_numeric($price)) {
+        $errors[] = "Price must be a valid number.";
+    }
+
+    if (empty($copy) || !is_numeric($copy)) {
+        $errors[] = "Copies must be a valid number.";
+    }
+
+    return $errors;
+}
+?>
+
+=>simple_add1.php  (aa validation mate nu chhe)
+
+
+<!DOCTYPE html>
+<?php
+    include("simplecon.php");
+    include("simple_validate.php"); // Include the validation logic
+?>
+<html>
+<head>
+    <title>Library Management</title>
+    <!-- Client-side Validation -->
+    <script>
+        function validateForm() {
+            var title = document.forms["bookForm"]["title"].value;
+            var author = document.forms["bookForm"]["author"].value;
+            var price = document.forms["bookForm"]["price"].value;
+            var copy = document.forms["bookForm"]["copy"].value;
+
+            if (title == "" || author == "" || price == "" || copy == "") {
+                alert("All fields must be filled out.");
+                return false;
+            }
+
+            if (isNaN(price) || isNaN(copy)) {
+                alert("Price and number of copies must be numbers.");
+                return false;
+            }
+
+            return true;
+        }
+    </script>
+</head>
+<body>
+    <!-- Form with client-side validation -->
+    <form name="bookForm" action="" method="post" onsubmit="return validateForm()">
+        <table>
+            <tr>
+                <td>id:</td>
+                <td><input type="number" name="id"></td>
+            </tr>
+            <tr>
+                <td>title:</td>
+                <td><input type="text" name="title"></td>
+            </tr>
+            <tr>
+                <td>author:</td>
+                <td><input type="text" name="author"></td>
+            </tr>
+            <tr>
+                <td>price:</td>
+                <td><input type="number" name="price"></td>
+            </tr>
+            <tr>
+                <td>copy:</td>
+                <td><input type="number" name="copy"></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+				<input type="submit" name="insert" value="insert">
+                <input type="submit" name="update" value="update">
+                <input type="submit" name="delete" value="delete">
+				</td>
+            </tr>
+        </table>
+    </form>
+	</form>
+
+<!-- Form for Search -->
+<h2>Search Books</h2>
+<form action="" method="post">
+    <label for="searchTerm">Search by Title, Author, or Price:</label>
+    <input type="text" name="searchTerm" placeholder="Enter title, author, or price">
+    <input type="submit" name="search" value="Search">
+</form>
+
+
+    <?php
+    if (isset($_POST['insert'])) {
+        $title = $_POST['title'];
+        $author = $_POST['author'];
+        $price = $_POST['price'];
+        $copy = $_POST['copy'];
+
+        // Use validate function from the external file
+        $errors = validate($title, $author, $price, $copy);
+        if (empty($errors)) {
+            $query = "INSERT INTO book (title, author, price, copy) VALUES ('$title', '$author', '$price', '$copy')";
+            $data = mysqli_query($conn, $query);
+
+            if ($data) {
+                echo "Inserted successfully.";
+            } else {
+                echo "Error inserting data.";
+            }
+        } else {
+            foreach ($errors as $error) {
+                echo "<p style='color:red;'>$error</p>";
+            }
+        }
+    }
+
+    if (isset($_POST['update'])) {
+        $id = $_POST['id'];
+        $title = $_POST['title'];
+        $author = $_POST['author'];
+        $price = $_POST['price'];
+        $copy = $_POST['copy'];
+
+        $errors = validate($title, $author, $price, $copy);
+        if (empty($errors)) {
+            $query = "UPDATE book SET title='$title', author='$author', price='$price', copy='$copy' WHERE id='$id'";
+            $data = mysqli_query($conn, $query);
+
+            if ($data) {
+                echo "Updated successfully.";
+            } else {
+                echo "Error updating data.";
+            }
+        } else {
+            foreach ($errors as $error) {
+                echo "<p style='color:red;'>$error</p>";
+            }
+        }
+    }
+
+    if (isset($_POST['delete'])) {
+        $id = $_POST['id'];
+
+        if (!empty($id)) {
+            $query = "DELETE FROM book WHERE id='$id'";
+            $data = mysqli_query($conn, $query);
+
+            if ($data) {
+                echo "Deleted successfully.";
+            } else {
+                echo "Error deleting data.";
+            }
+        } else {
+            echo "<p style='color:red;'>ID is required for deletion.</p>";
+        }
+    }
+	
+  // Search for books
+if(isset($_POST['search'])){
+    $searchTerm = $_POST['searchTerm'];
+    
+    $query = "SELECT * FROM book WHERE title LIKE '%$searchTerm%' OR author LIKE '%$searchTerm%' OR price LIKE '%$searchTerm%'";
+    $result = mysqli_query($conn, $query);
+
+    echo "<h2>Search Results</h2>";
+    echo "<table border='1'>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Author</th>
+        <th>Price</th>
+        <th>Copies</th>
+    </tr>";
+
+    while($row = mysqli_fetch_assoc($result)){
+        echo "<tr>";
+        echo "<td>" . $row['id'] . "</td>";
+        echo "<td>" . $row['title'] . "</td>";
+        echo "<td>" . $row['author'] . "</td>";
+        echo "<td>" . $row['price'] . "</td>";
+        echo "<td>" . $row['copy'] . "</td>";
+        echo "</tr>";
+    }
+    echo "</table>";
+}
+
+
+
+  // View all books
+echo "<h2>View All Books</h2>";
+echo "<table border='1'>
+<tr>
+    <th>ID</th>
+    <th>Title</th>
+    <th>Author</th>
+    <th>Price</th>
+    <th>Copies</th>
+</tr>";
+
+$query = "SELECT * FROM book";
+$result = mysqli_query($conn, $query);
+
+// Loop through the result set and display data in table rows
+while($row = mysqli_fetch_assoc($result)){
+    echo "<tr>";
+    echo "<td>" . $row['id'] . "</td>";
+    echo "<td>" . $row['title'] . "</td>";
+    echo "<td>" . $row['author'] . "</td>";
+    echo "<td>" . $row['price'] . "</td>";
+    echo "<td>" . $row['copy'] . "</td>";
+    echo "</tr>";
+}
+
+echo "</table>";
+
+
+    ?>
+</body>
+</html>
+

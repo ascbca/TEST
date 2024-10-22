@@ -1,0 +1,425 @@
+//********election system***********//
+
+
+electionsystem.aspx
+
+
+<%@ Page Language="C#" AutoEventWireup="true" CodeFile="electionsystem.aspx.cs" Inherits="electionsystem.electionsystem" %>
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head runat="server">
+    <meta charset="UTF-8">
+    <title>Online Election System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            width: 600px;
+            margin: auto;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .vote-button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div> 
+            <div class="container">
+        <h1>Online Election System</h1>
+
+        <asp:Label ID="lblMessage" runat="server" Text=""></asp:Label>
+        
+        <h3>Candidate List</h3>
+        <asp:GridView ID="gvCandidates" runat="server" AutoGenerateColumns="False">
+            <Columns>
+                <asp:BoundField DataField="CandidateName" HeaderText="Candidate Name" />
+                <asp:TemplateField>
+                    <ItemTemplate>
+                        <asp:Button ID="btnVote" runat="server" Text="Vote" CommandArgument='<%# Eval("CandidateID") %>' OnClick="Vote_Click" CssClass="vote-button" />
+                    </ItemTemplate>
+                </asp:TemplateField>
+            </Columns>
+        </asp:GridView>
+
+        <h3>Results</h3>
+        <asp:GridView ID="gvResults" runat="server" AutoGenerateColumns="False">
+            <Columns>
+                <asp:BoundField DataField="CandidateName" HeaderText="Candidate Name" />
+                <asp:BoundField DataField="Votes" HeaderText="Votes" />
+            </Columns>
+        </asp:GridView>
+    </div>
+
+        </div>
+    </form>
+
+   </body>
+</html>
+
+
+
+electionsystem.aspx.cs
+
+
+using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+using System.Web.UI.WebControls;
+
+namespace electionsystem
+{
+    public partial class electionsystem : System.Web.UI.Page
+    {
+        // Get connection string from the configuration file
+        private string connStr = ConfigurationManager.ConnectionStrings["ElectionDB"].ConnectionString;
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            if (!IsPostBack)
+            {
+                LoadCandidates(); // Load candidate list
+                LoadResults(); // Load current results
+            }
+        }
+
+        // Method to load candidate data
+        protected void LoadCandidates()
+        {
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                SqlCommand cmd = new SqlCommand("SELECT CandidateID, CandidateName FROM Candidates", conn);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                gvCandidates.DataSource = dt;
+                gvCandidates.DataBind();
+            }
+        }
+
+        // Method to load voting results
+        protected void LoadResults()
+        {
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                SqlCommand cmd = new SqlCommand("SELECT CandidateName, Votes FROM Candidates", conn);
+                SqlDataAdapter da = new SqlDataAdapter(cmd);
+                DataTable dt = new DataTable();
+                da.Fill(dt);
+                gvResults.DataSource = dt;
+                gvResults.DataBind();
+            }
+        }
+
+        // Event handler for voting button
+        protected void Vote_Click(object sender, EventArgs e)
+        {
+            Button btn = (Button)sender;
+            int candidateID = Convert.ToInt32(btn.CommandArgument);
+
+            using (SqlConnection conn = new SqlConnection(connStr))
+            {
+                SqlCommand cmd = new SqlCommand("UPDATE Candidates SET Votes = Votes + 1 WHERE CandidateID = @CandidateID", conn);
+                cmd.Parameters.AddWithValue("@CandidateID", candidateID);
+                conn.Open();
+                cmd.ExecuteNonQuery();
+            }
+
+            lblMessage.Text = "Vote cast successfully!";
+            LoadResults(); // Refresh the results grid to reflect the updated votes
+        }
+
+        protected void gvCandidates_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
+
+
+//**************sweb.config************//
+
+
+
+<?xml version="1.0"?>
+
+
+<configuration>
+	<connectionStrings>
+		<add name="ElectionDB" connectionString="Data Source=DESKTOP-0I5MGN1;Initial Catalog=ElectionDB;Integrated Security=True" providerName="System.Data.SqlClient" />
+	</connectionStrings>
+
+	<system.web>
+    <compilation debug="true"/>
+  </system.web>
+</configuration>
+
+
+
+//***************php**********//
+ 
+
+display.php
+
+<?php 
+    $connect=mysqli_connect("localhost","root","","demo1");
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{
+        background-color:gray;
+        }
+
+        body input,table{
+            box-shadow:8px 8px 10px black;
+        }
+    </style>
+</head>
+<body>
+<form action="" method="POST">
+<input type="submit" name="btndisplayall" value="Diaplay All Record"><br><br>
+
+<input type="text" name="search" placeholder="Enter User ID"> <input type="submit" name="btnsearch" value="Search"><br><br>
+ 
+
+<input type="text" name="del" placeholder="Enter User ID"> <input type="submit" name="btndel" value="Delete"><br><br>
+
+        <?php 
+            if(isset($_POST['btndel'])){
+                $idd=$_POST['del'];
+                $del="delete from tbl_user where id=$idd";
+                $res=mysqli_query($connect,$del);
+            }
+        ?>
+
+        UserID : <input type="text" name="id"></br>
+        FName : <input type="text" name="sname"></br>
+        Course : <input type="text" name="course"></br>
+        Contact: <input type="text" name="contact"></br>
+        Addresh:<input type="text" name="addresh"></br>
+        <input type="submit" name="btnupdate" value="Update"></br></br>
+
+        <?php
+        if(isset($_POST['btnupdate'])){
+            $id=$_POST['id'];
+            $name=$_POST['sname'];
+            $course=$_POST['course'];
+            $contact=$_POST['contact'];
+            $addresh=$_POST['addresh'];
+
+            $update="update tbl_user set name='$name', course='$course', contact=$contact ,addresh='$addresh' where id=$id ";
+            mysqli_query($connect,$update);
+           
+           
+        }
+
+        ?>
+        
+    <table border="1" style="background-color:#b0e8ff">
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Course</th>
+            <th>Contact</th>
+            <th>Addresh</th>
+        </tr>
+
+        
+            <?php
+                if(isset($_POST['btndisplayall'])){
+                    $select = "select * from tbl_user";
+                    $result=mysqli_query($connect,$select);
+                     while($row=mysqli_fetch_array($result)){
+            ?>
+                    <tr>
+                        <td><?php echo $row[0]; ?></td>
+                        <td><?php echo $row[1]; ?></td>
+                        <td><?php echo $row[2]; ?></td>
+                        <td><?php echo $row[3]; ?></td>
+                        <td><?php echo $row[4]; ?></td>
+                    </tr>
+            <?php 
+                    }
+                }
+             ?>
+
+        
+            <?php 
+                if(isset($_POST['btnsearch'])){
+                    $sidd=$_POST['search'];
+                    $search="select * from tbl_user where id=$sidd";
+                    $rest=mysqli_query($connect,$search);
+                    while($row=mysqli_fetch_array($rest)){
+            ?>
+
+                <tr>
+                    <td><?php echo $row[0]; ?></td>
+                    <td><?php echo $row[1]; ?></td>
+                    <td><?php echo $row[2]; ?></td>
+                    <td><?php echo $row[3]; ?></td>
+                    <td><?php echo $row[4]; ?></td>
+                </tr>
+
+            <?php 
+                 }
+             }
+            ?>
+
+    </table>
+
+   
+    </form>
+</body>
+</html>
+
+index.php
+
+<?php 
+    $connect=mysqli_connect("localhost","root","","demo1");
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+    <?php
+        if(isset($_POST['btnsubmit'])){
+            $name=$_POST['sname'];
+            $course=$_POST['course'];
+            $contact=$_POST['contact'];
+            $addresh=$_POST['addresh'];
+
+            $insert="insert into tbl_user values (0,'$name','$course',$contact,'$addresh')";
+            if(mysqli_query($connect,$insert)){
+                echo "Insert Succerssfully";
+                header("location:display.php");
+            }
+           
+        }
+        if(isset($_POST['display'])){
+            header("location:display.php");
+        }
+    ?>
+
+<body>
+    <form action="" method="POST">
+        Name:<input type="text" name="sname"></br>
+        Course:<input type="text" name="course"></br>
+        Contact:<input type="text" name="contact"></br>
+        Address:<input type="text" name="addresh"></br>
+        <input type="submit" name="btnsubmit"> 
+		<input type="submit" value="Display" name="display"></br>
+    </form>
+</body>
+</html>
+
+
+
+demo1.sql
+
+
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Host: 127.0.0.1
+-- Generation Time: Aug 01, 2024 at 06:53 PM
+-- Server version: 10.4.28-MariaDB
+-- PHP Version: 8.0.28
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `demo`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tbl_user`
+--
+
+CREATE TABLE `tbl_user` (
+  `id` int(11) NOT NULL,
+  `name` varchar(20) NOT NULL,
+  `course` varchar(50) NOT NULL,
+  `contact` int(10) NOT NULL,
+  `addresh` varchar(100) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `tbl_user`
+--
+
+INSERT INTO `tbl_user` (`id`, `name`, `course`, `contact`, `addresh`) VALUES
+(4, 'urmi', 'bca', 123456789, 'ahemdabad'),
+(5, 'a', 'bca', 123456789, 'surat'),
+(6, 'a', 'bca', 123456789, 'aaaa');
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `tbl_user`
+--
+ALTER TABLE `tbl_user`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `tbl_user`
+--
+ALTER TABLE `tbl_user`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
